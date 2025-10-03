@@ -1,12 +1,170 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useEffect } from "react";
+import { StatusSidebar } from "@/components/StatusSidebar";
+import { FilterBar } from "@/components/FilterBar";
+import { EventCard } from "@/components/EventCard";
+import { PreviewModal } from "@/components/PreviewModal";
+import { AutoScrollToggle } from "@/components/AutoScrollToggle";
+import { mockEvents } from "@/data/mockEvents";
+import { StreamEvent, EventStatus } from "@/types/event";
+import { toast } from "sonner";
 
 const Index = () => {
+  const [events, setEvents] = useState<StreamEvent[]>(mockEvents);
+  const [selectedStatus, setSelectedStatus] = useState<EventStatus | "all">("all");
+  const [timeFilter, setTimeFilter] = useState("all");
+  const [destinationFilter, setDestinationFilter] = useState("all");
+  const [adminFilter, setAdminFilter] = useState("all");
+  const [previewEvent, setPreviewEvent] = useState<StreamEvent | null>(null);
+  const [autoScroll, setAutoScroll] = useState(false);
+
+  const maxPinnedEvents = 3;
+
+  // Calculate status counts
+  const statusCounts = events.reduce(
+    (acc, event) => {
+      acc[event.status] = (acc[event.status] || 0) + 1;
+      return acc;
+    },
+    {} as Record<EventStatus, number>
+  );
+
+  // Ensure all statuses have a count
+  const allStatusCounts: Record<EventStatus, number> = {
+    healthy: 0,
+    "low-views": 0,
+    "low-interaction": 0,
+    "stream-freeze": 0,
+    error: 0,
+    "not-live": 0,
+    ...statusCounts,
+  };
+
+  // Filter events
+  const filteredEvents = events.filter((event) => {
+    if (selectedStatus !== "all" && event.status !== selectedStatus) return false;
+    // Add more filter logic here for time, destination, admin
+    return true;
+  });
+
+  // Separate pinned and unpinned events
+  const pinnedEvents = filteredEvents.filter((e) => e.isPinned);
+  const unpinnedEvents = filteredEvents.filter((e) => !e.isPinned);
+
+  const handleTogglePin = (id: string) => {
+    setEvents((prev) =>
+      prev.map((event) => {
+        if (event.id === id) {
+          const currentPinnedCount = prev.filter((e) => e.isPinned).length;
+          
+          if (!event.isPinned && currentPinnedCount >= maxPinnedEvents) {
+            toast.error(`You can only pin up to ${maxPinnedEvents} events`);
+            return event;
+          }
+
+          const newPinnedState = !event.isPinned;
+          toast.success(
+            newPinnedState ? "Event pinned to top" : "Event unpinned"
+          );
+          return { ...event, isPinned: newPinnedState };
+        }
+        return event;
+      })
+    );
+  };
+
+  const handlePreview = (event: StreamEvent) => {
+    setPreviewEvent(event);
+  };
+
+  // Auto-scroll effect
+  useEffect(() => {
+    if (!autoScroll) return;
+
+    const interval = setInterval(() => {
+      window.scrollBy({ top: 100, behavior: "smooth" });
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [autoScroll]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="flex min-h-screen w-full bg-background">
+      <StatusSidebar
+        statusCounts={allStatusCounts}
+        selectedStatus={selectedStatus}
+        onStatusSelect={setSelectedStatus}
+      />
+
+      <div className="flex-1 flex flex-col">
+        <FilterBar
+          timeFilter={timeFilter}
+          destinationFilter={destinationFilter}
+          adminFilter={adminFilter}
+          onTimeFilterChange={setTimeFilter}
+          onDestinationFilterChange={setDestinationFilter}
+          onAdminFilterChange={setAdminFilter}
+        />
+
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-6xl mx-auto space-y-6">
+            {pinnedEvents.length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                  📌 Pinned Events
+                  <span className="text-sm text-muted-foreground font-normal">
+                    ({pinnedEvents.length}/{maxPinnedEvents})
+                  </span>
+                </h2>
+                {pinnedEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onTogglePin={handleTogglePin}
+                    onPreview={handlePreview}
+                  />
+                ))}
+              </div>
+            )}
+
+            {unpinnedEvents.length > 0 && (
+              <div className="space-y-4">
+                {pinnedEvents.length > 0 && (
+                  <h2 className="text-lg font-semibold text-foreground mt-8">
+                    All Events
+                  </h2>
+                )}
+                {unpinnedEvents.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    onTogglePin={handleTogglePin}
+                    onPreview={handlePreview}
+                  />
+                ))}
+              </div>
+            )}
+
+            {filteredEvents.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-lg">
+                  No events found matching your filters
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
+
+      <PreviewModal
+        event={previewEvent}
+        open={!!previewEvent}
+        onClose={() => setPreviewEvent(null)}
+      />
+
+      <AutoScrollToggle
+        enabled={autoScroll}
+        onToggle={() => setAutoScroll(!autoScroll)}
+      />
     </div>
   );
 };
