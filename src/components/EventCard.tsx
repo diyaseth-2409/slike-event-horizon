@@ -57,16 +57,16 @@ export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => 
       )}
     >
       <div className="flex gap-4 p-4">
-        {/* Thumbnail */}
+        {/* Thumbnail - Larger */}
         <div className="relative flex-shrink-0">
           <img
             src={event.thumbnail}
             alt={event.title}
-            className="w-48 h-27 object-cover rounded-md"
+            className="w-80 h-45 object-cover rounded-lg"
           />
           {event.status === "stream-freeze" && (
-            <div className="absolute inset-0 bg-destructive/20 flex items-center justify-center rounded-md">
-              <AlertTriangle className="h-8 w-8 text-destructive animate-pulse" />
+            <div className="absolute inset-0 bg-destructive/20 flex items-center justify-center rounded-lg">
+              <AlertTriangle className="h-10 w-10 text-destructive animate-pulse" />
             </div>
           )}
         </div>
