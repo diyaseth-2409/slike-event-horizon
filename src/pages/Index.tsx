@@ -16,6 +16,7 @@ const Index = () => {
   const [adminFilter, setAdminFilter] = useState("all");
   const [previewEvent, setPreviewEvent] = useState<StreamEvent | null>(null);
   const [autoScroll, setAutoScroll] = useState(false);
+  const [gridColumns, setGridColumns] = useState(3);
 
   const maxPinnedEvents = 3;
 
@@ -87,6 +88,19 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [autoScroll]);
 
+  const getGridClass = () => {
+    switch (gridColumns) {
+      case 2:
+        return "grid-cols-1 md:grid-cols-2";
+      case 3:
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+      case 4:
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+      default:
+        return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
+    }
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       <StatusSidebar
@@ -100,47 +114,53 @@ const Index = () => {
           timeFilter={timeFilter}
           destinationFilter={destinationFilter}
           adminFilter={adminFilter}
+          gridColumns={gridColumns}
           onTimeFilterChange={setTimeFilter}
           onDestinationFilterChange={setDestinationFilter}
           onAdminFilterChange={setAdminFilter}
+          onGridColumnsChange={setGridColumns}
         />
 
         <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-6xl mx-auto space-y-6">
+          <div className="max-w-[1800px] mx-auto">
             {pinnedEvents.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
                   📌 Pinned Events
                   <span className="text-sm text-muted-foreground font-normal">
                     ({pinnedEvents.length}/{maxPinnedEvents})
                   </span>
                 </h2>
-                {pinnedEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onTogglePin={handleTogglePin}
-                    onPreview={handlePreview}
-                  />
-                ))}
+                <div className={`grid ${getGridClass()} gap-6`}>
+                  {pinnedEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onTogglePin={handleTogglePin}
+                      onPreview={handlePreview}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 
             {unpinnedEvents.length > 0 && (
-              <div className="space-y-4">
+              <div>
                 {pinnedEvents.length > 0 && (
-                  <h2 className="text-lg font-semibold text-foreground mt-8">
+                  <h2 className="text-lg font-semibold text-foreground mb-4">
                     All Events
                   </h2>
                 )}
-                {unpinnedEvents.map((event) => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    onTogglePin={handleTogglePin}
-                    onPreview={handlePreview}
-                  />
-                ))}
+                <div className={`grid ${getGridClass()} gap-6`}>
+                  {unpinnedEvents.map((event) => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      onTogglePin={handleTogglePin}
+                      onPreview={handlePreview}
+                    />
+                  ))}
+                </div>
               </div>
             )}
 

@@ -7,23 +7,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { ViewControls } from "./ViewControls";
 
 interface FilterBarProps {
   timeFilter: string;
   destinationFilter: string;
   adminFilter: string;
+  gridColumns: number;
   onTimeFilterChange: (value: string) => void;
   onDestinationFilterChange: (value: string) => void;
   onAdminFilterChange: (value: string) => void;
+  onGridColumnsChange: (columns: number) => void;
 }
 
 export const FilterBar = ({
   timeFilter,
   destinationFilter,
   adminFilter,
+  gridColumns,
   onTimeFilterChange,
   onDestinationFilterChange,
   onAdminFilterChange,
+  onGridColumnsChange,
 }: FilterBarProps) => {
   return (
     <div className="flex items-center gap-4 p-4 bg-card border-b border-border">
@@ -73,9 +78,12 @@ export const FilterBar = ({
         </SelectContent>
       </Select>
 
-      <Button variant="outline" size="sm" className="ml-auto">
-        Reset Filters
-      </Button>
+      <div className="ml-auto flex items-center gap-2">
+        <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
+        <Button variant="outline" size="sm">
+          Reset Filters
+        </Button>
+      </div>
     </div>
   );
 };
