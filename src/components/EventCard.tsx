@@ -122,29 +122,26 @@ export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => 
           )}
         </div>
 
-        <div className="flex flex-col gap-2 mt-auto">
-          <Button size="sm" onClick={() => onPreview(event)} className="w-full">
+        <div className="flex gap-2 mt-auto">
+          <Button size="sm" onClick={() => onPreview(event)} className="flex-1">
             Preview
           </Button>
 
           {event.status === "not-live" && (
-            <Button size="sm" variant="secondary" className="w-full">
-              <Play className="h-4 w-4 mr-2" />
-              Start Stream
+            <Button size="sm" variant="secondary" className="flex-1">
+              <Play className="h-3 w-3" />
             </Button>
           )}
 
           {event.status === "stream-freeze" && (
-            <Button size="sm" variant="secondary" className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
+            <Button size="sm" variant="secondary" className="flex-1">
+              <RefreshCw className="h-3 w-3" />
             </Button>
           )}
 
           {hasError && (
-            <Button size="sm" variant="destructive" className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Retry
+            <Button size="sm" variant="destructive" className="flex-1">
+              <RefreshCw className="h-3 w-3" />
             </Button>
           )}
         </div>

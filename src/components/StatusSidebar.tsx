@@ -1,6 +1,8 @@
-import { CheckCircle, AlertTriangle, AlertCircle, PauseCircle, XCircle, Clock } from "lucide-react";
+import { CheckCircle, AlertTriangle, AlertCircle, PauseCircle, XCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "./ui/button";
+import { Checkbox } from "./ui/checkbox";
 import { EventStatus } from "@/types/event";
+import { cn } from "@/lib/utils";
 
 interface StatusItem {
   status: EventStatus;
@@ -12,11 +14,14 @@ interface StatusItem {
 
 interface StatusSidebarProps {
   statusCounts: Record<EventStatus, number>;
-  selectedStatus: EventStatus | "all";
-  onStatusSelect: (status: EventStatus | "all") => void;
+  selectedStatuses: Set<EventStatus>;
+  onStatusToggle: (status: EventStatus) => void;
+  onSelectAll: () => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export const StatusSidebar = ({ statusCounts, selectedStatus, onStatusSelect }: StatusSidebarProps) => {
+export const StatusSidebar = ({ statusCounts, selectedStatuses, onStatusToggle, onSelectAll, isCollapsed, onToggleCollapse }: StatusSidebarProps) => {
   const statusItems: StatusItem[] = [
     { 
       status: "healthy", 
@@ -64,46 +69,86 @@ export const StatusSidebar = ({ statusCounts, selectedStatus, onStatusSelect }: 
 
   const totalEvents = Object.values(statusCounts).reduce((a, b) => a + b, 0);
 
+  const isAllSelected = selectedStatuses.size === 0;
+
   return (
-    <div className="w-64 bg-sidebar border-r border-sidebar-border h-screen flex flex-col">
-      <div className="p-6 border-b border-sidebar-border">
-        <h1 className="text-2xl font-bold text-sidebar-foreground">Slike CMS</h1>
-        <p className="text-sm text-muted-foreground mt-1">Event Monitoring</p>
+    <div className={cn(
+      "bg-sidebar border-r border-sidebar-border h-screen flex flex-col transition-all duration-300",
+      isCollapsed ? "w-16" : "w-64"
+    )}>
+      <div className={cn(
+        "p-4 border-b border-sidebar-border flex items-center justify-between",
+        isCollapsed && "flex-col gap-2"
+      )}>
+        {!isCollapsed && (
+          <div>
+            <h1 className="text-xl font-bold text-sidebar-foreground">Slike CMS</h1>
+            <p className="text-xs text-muted-foreground mt-1">Event Monitoring</p>
+          </div>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onToggleCollapse}
+          className="h-8 w-8"
+        >
+          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+        </Button>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 space-y-1">
         <Button
-          variant={selectedStatus === "all" ? "default" : "ghost"}
-          className="w-full justify-start text-left"
-          onClick={() => onStatusSelect("all")}
+          variant={isAllSelected ? "default" : "ghost"}
+          className={cn("w-full justify-start text-left", isCollapsed && "px-2")}
+          onClick={onSelectAll}
         >
-          <div className="flex items-center justify-between w-full">
-            <span className="font-medium">All Events</span>
-            <span className="text-sm opacity-70">{totalEvents}</span>
-          </div>
+          {isCollapsed ? (
+            <span className="text-sm font-bold">{totalEvents}</span>
+          ) : (
+            <div className="flex items-center justify-between w-full">
+              <span className="font-medium">All Events</span>
+              <span className="text-sm opacity-70">{totalEvents}</span>
+            </div>
+          )}
         </Button>
 
-        <div className="pt-4 pb-2">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-3">
-            Status
-          </p>
-        </div>
+        {!isCollapsed && (
+          <div className="pt-3 pb-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide px-2">
+              Status
+            </p>
+          </div>
+        )}
 
         {statusItems.map((item) => (
-          <Button
+          <div
             key={item.status}
-            variant={selectedStatus === item.status ? "default" : "ghost"}
-            className="w-full justify-start text-left"
-            onClick={() => onStatusSelect(item.status)}
+            className={cn(
+              "flex items-center gap-2 p-2 rounded-md hover:bg-accent cursor-pointer transition-colors",
+              selectedStatuses.has(item.status) && "bg-accent",
+              isCollapsed && "justify-center"
+            )}
+            onClick={() => onStatusToggle(item.status)}
           >
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-3">
+            {!isCollapsed && (
+              <Checkbox
+                checked={selectedStatuses.has(item.status)}
+                onCheckedChange={() => onStatusToggle(item.status)}
+              />
+            )}
+            <div className={cn(
+              "flex items-center flex-1",
+              isCollapsed ? "flex-col gap-1" : "justify-between"
+            )}>
+              <div className={cn("flex items-center gap-2", isCollapsed && "flex-col")}>
                 <span className={item.color}>{item.icon}</span>
-                <span>{item.label}</span>
+                {!isCollapsed && <span className="text-sm">{item.label}</span>}
               </div>
-              <span className="text-sm opacity-70">{item.count}</span>
+              <span className={cn("text-xs opacity-70", isCollapsed && "text-[10px]")}>
+                {item.count}
+              </span>
             </div>
-          </Button>
+          </div>
         ))}
       </div>
     </div>

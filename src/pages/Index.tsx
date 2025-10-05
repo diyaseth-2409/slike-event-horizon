@@ -10,13 +10,14 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [events, setEvents] = useState<StreamEvent[]>(mockEvents);
-  const [selectedStatus, setSelectedStatus] = useState<EventStatus | "all">("all");
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<EventStatus>>(new Set());
   const [timeFilter, setTimeFilter] = useState("all");
   const [destinationFilter, setDestinationFilter] = useState("all");
   const [adminFilter, setAdminFilter] = useState("all");
   const [previewEvent, setPreviewEvent] = useState<StreamEvent | null>(null);
   const [autoScroll, setAutoScroll] = useState(false);
   const [gridColumns, setGridColumns] = useState(3);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const maxPinnedEvents = 3;
 
@@ -40,9 +41,25 @@ const Index = () => {
     ...statusCounts,
   };
 
+  const handleStatusToggle = (status: EventStatus) => {
+    setSelectedStatuses((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(status)) {
+        newSet.delete(status);
+      } else {
+        newSet.add(status);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedStatuses(new Set());
+  };
+
   // Filter events
   const filteredEvents = events.filter((event) => {
-    if (selectedStatus !== "all" && event.status !== selectedStatus) return false;
+    if (selectedStatuses.size > 0 && !selectedStatuses.has(event.status)) return false;
     // Add more filter logic here for time, destination, admin
     return true;
   });
@@ -105,8 +122,11 @@ const Index = () => {
     <div className="flex min-h-screen w-full bg-background">
       <StatusSidebar
         statusCounts={allStatusCounts}
-        selectedStatus={selectedStatus}
-        onStatusSelect={setSelectedStatus}
+        selectedStatuses={selectedStatuses}
+        onStatusToggle={handleStatusToggle}
+        onSelectAll={handleSelectAll}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
 
       <div className="flex-1 flex flex-col">
