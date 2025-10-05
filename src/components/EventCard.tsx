@@ -1,4 +1,4 @@
-import { Pin, Eye, User, Play, RefreshCw, AlertTriangle } from "lucide-react";
+import { Pin, Eye, User, Play, RefreshCw, AlertTriangle, RotateCcw } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -141,7 +141,7 @@ export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => 
 
           {hasError && (
             <Button size="sm" variant="destructive" className="flex-1">
-              <RefreshCw className="h-3 w-3" />
+              <RotateCcw className="h-3 w-3" />
             </Button>
           )}
         </div>
