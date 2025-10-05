@@ -34,6 +34,14 @@ export const ViewControls = ({ gridColumns, onGridColumnsChange }: ViewControlsP
           <LayoutGrid className="h-4 w-4 mr-2" />
           4 videos per row
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onGridColumnsChange(6)}>
+          <LayoutGrid className="h-4 w-4 mr-2" />
+          6 videos per row
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onGridColumnsChange(8)}>
+          <LayoutGrid className="h-4 w-4 mr-2" />
+          8 videos per row
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
