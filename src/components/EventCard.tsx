@@ -1,9 +1,10 @@
-import { Pin, Eye, User, Play, RefreshCw, AlertTriangle, RotateCcw } from "lucide-react";
+import { Pin, Eye, User, Play, RefreshCw, AlertTriangle, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { StreamEvent } from "@/types/event";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
 
 interface EventCardProps {
   event: StreamEvent;
@@ -12,6 +13,8 @@ interface EventCardProps {
 }
 
 export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case "healthy":
@@ -82,65 +85,76 @@ export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => 
       </div>
 
       {/* Content */}
-      <div className="p-4 flex-1 flex flex-col">
-        <h3 className="font-semibold text-base text-card-foreground line-clamp-2 mb-3">
-          {event.title}
-        </h3>
-
-        <div className="flex flex-col gap-2 text-sm text-muted-foreground mb-3">
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1">
-              <Eye className="h-4 w-4" />
-              {event.viewers.toLocaleString()}
-            </span>
-            <span className="flex items-center gap-1">
-              <User className="h-4 w-4" />
-              {event.admin}
-            </span>
-          </div>
-          <span className="text-xs">{formatDateTime(event.dateTime)}</span>
+      <div className="p-2 flex-1 flex flex-col">
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className="font-semibold text-sm text-card-foreground line-clamp-2 flex-1">
+            {event.title}
+          </h3>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="h-6 w-6 shrink-0"
+          >
+            {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </Button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <Badge className={cn(getStatusColor(event.status), "text-xs")}>
+        <div className="flex flex-wrap items-center gap-1 mb-2">
+          <Badge className={cn(getStatusColor(event.status), "text-xs py-0 h-5")}>
             {getStatusLabel(event.status)}
           </Badge>
-
           {event.destinations.slice(0, 2).map((dest) => (
             <Badge
               key={dest.name}
               variant={dest.connected ? "secondary" : "destructive"}
-              className="text-xs"
+              className="text-xs py-0 h-5"
             >
               {dest.name}
             </Badge>
           ))}
           {event.destinations.length > 2 && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs py-0 h-5">
               +{event.destinations.length - 2}
             </Badge>
           )}
         </div>
 
-        <div className="flex gap-2 mt-auto">
-          <Button size="sm" onClick={() => onPreview(event)} className="flex-1">
+        {isExpanded && (
+          <>
+            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
+              <span className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                {event.viewers.toLocaleString()}
+              </span>
+              <span className="flex items-center gap-1">
+                <User className="h-3 w-3" />
+                {event.admin}
+              </span>
+            </div>
+            <span className="text-xs text-muted-foreground mb-2">{formatDateTime(event.dateTime)}</span>
+          </>
+        )}
+
+        <div className="flex gap-1 mt-auto">
+          <Button size="sm" onClick={() => onPreview(event)} className="flex-1 h-7 text-xs">
             Preview
           </Button>
 
           {event.status === "not-live" && (
-            <Button size="sm" variant="secondary" className="flex-1">
+            <Button size="sm" variant="secondary" className="h-7 w-7 p-0">
               <Play className="h-3 w-3" />
             </Button>
           )}
 
           {event.status === "stream-freeze" && (
-            <Button size="sm" variant="secondary" className="flex-1">
+            <Button size="sm" variant="secondary" className="h-7 w-7 p-0">
               <RefreshCw className="h-3 w-3" />
             </Button>
           )}
 
           {hasError && (
-            <Button size="sm" variant="destructive" className="flex-1">
+            <Button size="sm" variant="destructive" className="h-7 w-7 p-0">
               <RotateCcw className="h-3 w-3" />
             </Button>
           )}
