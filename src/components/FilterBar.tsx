@@ -1,4 +1,4 @@
-import { Calendar, Filter } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Select,
@@ -14,10 +14,12 @@ interface FilterBarProps {
   destinationFilter: string;
   adminFilter: string;
   gridColumns: number;
+  cardsExpanded: boolean;
   onTimeFilterChange: (value: string) => void;
   onDestinationFilterChange: (value: string) => void;
   onAdminFilterChange: (value: string) => void;
   onGridColumnsChange: (columns: number) => void;
+  onCardsExpandedChange: (expanded: boolean) => void;
 }
 
 export const FilterBar = ({
@@ -25,10 +27,12 @@ export const FilterBar = ({
   destinationFilter,
   adminFilter,
   gridColumns,
+  cardsExpanded,
   onTimeFilterChange,
   onDestinationFilterChange,
   onAdminFilterChange,
   onGridColumnsChange,
+  onCardsExpandedChange,
 }: FilterBarProps) => {
   return (
     <div className="flex items-center gap-4 p-4 bg-card border-b border-border">
@@ -79,6 +83,14 @@ export const FilterBar = ({
       </Select>
 
       <div className="ml-auto flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => onCardsExpandedChange(!cardsExpanded)}
+        >
+          {cardsExpanded ? <ChevronUp className="h-4 w-4 mr-2" /> : <ChevronDown className="h-4 w-4 mr-2" />}
+          {cardsExpanded ? "Collapse All" : "Expand All"}
+        </Button>
         <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
         <Button variant="outline" size="sm">
           Reset Filters

@@ -1,20 +1,18 @@
-import { Pin, Eye, User, Play, RefreshCw, AlertTriangle, RotateCcw, ChevronDown, ChevronUp } from "lucide-react";
+import { Pin, Eye, User, Play, RefreshCw, AlertTriangle, RotateCcw } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
 import { StreamEvent } from "@/types/event";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 interface EventCardProps {
   event: StreamEvent;
   onTogglePin: (id: string) => void;
   onPreview: (event: StreamEvent) => void;
+  isExpanded: boolean;
 }
 
-export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  
+export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "healthy":
@@ -86,19 +84,9 @@ export const EventCard = ({ event, onTogglePin, onPreview }: EventCardProps) => 
 
       {/* Content */}
       <div className="p-2 flex-1 flex flex-col">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-sm text-card-foreground line-clamp-2 flex-1">
-            {event.title}
-          </h3>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="h-6 w-6 shrink-0"
-          >
-            {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          </Button>
-        </div>
+        <h3 className="font-semibold text-sm text-card-foreground line-clamp-2 mb-2">
+          {event.title}
+        </h3>
 
         <div className="flex flex-wrap items-center gap-1 mb-2">
           <Badge className={cn(getStatusColor(event.status), "text-xs py-0 h-5")}>

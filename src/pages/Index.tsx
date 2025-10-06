@@ -18,6 +18,7 @@ const Index = () => {
   const [autoScroll, setAutoScroll] = useState(false);
   const [gridColumns, setGridColumns] = useState(3);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [cardsExpanded, setCardsExpanded] = useState(false);
 
   const maxPinnedEvents = 3;
 
@@ -139,10 +140,12 @@ const Index = () => {
           destinationFilter={destinationFilter}
           adminFilter={adminFilter}
           gridColumns={gridColumns}
+          cardsExpanded={cardsExpanded}
           onTimeFilterChange={setTimeFilter}
           onDestinationFilterChange={setDestinationFilter}
           onAdminFilterChange={setAdminFilter}
           onGridColumnsChange={setGridColumns}
+          onCardsExpandedChange={setCardsExpanded}
         />
 
         <main className="flex-1 overflow-y-auto p-6">
@@ -162,6 +165,7 @@ const Index = () => {
                       event={event}
                       onTogglePin={handleTogglePin}
                       onPreview={handlePreview}
+                      isExpanded={cardsExpanded}
                     />
                   ))}
                 </div>
@@ -182,6 +186,7 @@ const Index = () => {
                       event={event}
                       onTogglePin={handleTogglePin}
                       onPreview={handlePreview}
+                      isExpanded={cardsExpanded}
                     />
                   ))}
                 </div>
