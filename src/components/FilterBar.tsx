@@ -1,4 +1,4 @@
-import { Calendar, Filter, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp, SidebarIcon, List } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   Select,
@@ -15,11 +15,13 @@ interface FilterBarProps {
   adminFilter: string;
   gridColumns: number;
   cardsExpanded: boolean;
+  layoutMode: "sidebar" | "subnav";
   onTimeFilterChange: (value: string) => void;
   onDestinationFilterChange: (value: string) => void;
   onAdminFilterChange: (value: string) => void;
   onGridColumnsChange: (columns: number) => void;
   onCardsExpandedChange: (expanded: boolean) => void;
+  onLayoutModeChange: (mode: "sidebar" | "subnav") => void;
 }
 
 export const FilterBar = ({
@@ -28,11 +30,13 @@ export const FilterBar = ({
   adminFilter,
   gridColumns,
   cardsExpanded,
+  layoutMode,
   onTimeFilterChange,
   onDestinationFilterChange,
   onAdminFilterChange,
   onGridColumnsChange,
   onCardsExpandedChange,
+  onLayoutModeChange,
 }: FilterBarProps) => {
   return (
     <div className="flex items-center gap-4 p-4 bg-card border-b border-border">
@@ -83,6 +87,15 @@ export const FilterBar = ({
       </Select>
 
       <div className="ml-auto flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onLayoutModeChange(layoutMode === "sidebar" ? "subnav" : "sidebar")}
+        >
+          {layoutMode === "sidebar" ? <List className="h-4 w-4 mr-2" /> : <SidebarIcon className="h-4 w-4 mr-2" />}
+          {layoutMode === "sidebar" ? "Sub Nav" : "Sidebar"}
+        </Button>
+
         <Button 
           variant="outline" 
           size="sm"

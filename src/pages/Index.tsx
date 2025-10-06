@@ -7,6 +7,7 @@ import { AutoScrollToggle } from "@/components/AutoScrollToggle";
 import { mockEvents } from "@/data/mockEvents";
 import { StreamEvent, EventStatus } from "@/types/event";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
   const [events, setEvents] = useState<StreamEvent[]>(mockEvents);
@@ -16,9 +17,11 @@ const Index = () => {
   const [adminFilter, setAdminFilter] = useState("all");
   const [previewEvent, setPreviewEvent] = useState<StreamEvent | null>(null);
   const [autoScroll, setAutoScroll] = useState(false);
+  const [scrollInterval, setScrollInterval] = useState(5);
   const [gridColumns, setGridColumns] = useState(3);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [cardsExpanded, setCardsExpanded] = useState(false);
+  const [layoutMode, setLayoutMode] = useState<"sidebar" | "subnav">("sidebar");
 
   const maxPinnedEvents = 3;
 
@@ -41,6 +44,8 @@ const Index = () => {
     "not-live": 0,
     ...statusCounts,
   };
+
+  const totalEvents = Object.values(allStatusCounts).reduce((a, b) => a + b, 0);
 
   const handleStatusToggle = (status: EventStatus) => {
     setSelectedStatuses((prev) => {
@@ -101,10 +106,10 @@ const Index = () => {
 
     const interval = setInterval(() => {
       window.scrollBy({ top: 100, behavior: "smooth" });
-    }, 2000);
+    }, scrollInterval * 1000);
 
     return () => clearInterval(interval);
-  }, [autoScroll]);
+  }, [autoScroll, scrollInterval]);
 
   const getGridClass = () => {
     switch (gridColumns) {
@@ -125,14 +130,16 @@ const Index = () => {
 
   return (
     <div className="flex min-h-screen w-full bg-background">
-      <StatusSidebar
-        statusCounts={allStatusCounts}
-        selectedStatuses={selectedStatuses}
-        onStatusToggle={handleStatusToggle}
-        onSelectAll={handleSelectAll}
-        isCollapsed={sidebarCollapsed}
-        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
-      />
+      {layoutMode === "sidebar" && (
+        <StatusSidebar
+          statusCounts={allStatusCounts}
+          selectedStatuses={selectedStatuses}
+          onStatusToggle={handleStatusToggle}
+          onSelectAll={handleSelectAll}
+          isCollapsed={sidebarCollapsed}
+          onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+        />
+      )}
 
       <div className="flex-1 flex flex-col">
         <FilterBar
@@ -141,12 +148,55 @@ const Index = () => {
           adminFilter={adminFilter}
           gridColumns={gridColumns}
           cardsExpanded={cardsExpanded}
+          layoutMode={layoutMode}
           onTimeFilterChange={setTimeFilter}
           onDestinationFilterChange={setDestinationFilter}
           onAdminFilterChange={setAdminFilter}
           onGridColumnsChange={setGridColumns}
           onCardsExpandedChange={setCardsExpanded}
+          onLayoutModeChange={setLayoutMode}
         />
+
+        {layoutMode === "subnav" && (
+          <div className="border-b border-border bg-card px-6 py-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button
+                onClick={handleSelectAll}
+                className={cn(
+                  "px-4 py-2 rounded-md text-sm font-medium transition-colors",
+                  selectedStatuses.size === 0 
+                    ? "bg-primary text-primary-foreground" 
+                    : "bg-muted hover:bg-muted/80"
+                )}
+              >
+                All Events ({totalEvents})
+              </button>
+              
+              {[
+                { status: "healthy", label: "Healthy", count: statusCounts.healthy, color: "bg-success" },
+                { status: "low-views", label: "Low Views", count: statusCounts["low-views"], color: "bg-warning" },
+                { status: "low-interaction", label: "Low Interaction", count: statusCounts["low-interaction"], color: "bg-warning" },
+                { status: "stream-freeze", label: "Stream Freeze", count: statusCounts["stream-freeze"], color: "bg-destructive" },
+                { status: "error", label: "Error", count: statusCounts.error, color: "bg-destructive" },
+                { status: "not-live", label: "Not Live", count: statusCounts["not-live"], color: "bg-muted-foreground" },
+              ].map((item) => (
+                <button
+                  key={item.status}
+                  onClick={() => handleStatusToggle(item.status as EventStatus)}
+                  className={cn(
+                    "px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
+                    selectedStatuses.has(item.status as EventStatus)
+                      ? "bg-accent border-2 border-primary"
+                      : "bg-muted hover:bg-muted/80"
+                  )}
+                >
+                  <span className={cn("w-2 h-2 rounded-full", item.color)} />
+                  {item.label} ({item.count})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-[1800px] mx-auto">
@@ -212,7 +262,9 @@ const Index = () => {
 
       <AutoScrollToggle
         enabled={autoScroll}
+        interval={scrollInterval}
         onToggle={() => setAutoScroll(!autoScroll)}
+        onIntervalChange={setScrollInterval}
       />
     </div>
   );
