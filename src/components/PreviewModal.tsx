@@ -1,6 +1,7 @@
-import { X, Youtube, Facebook, Twitch, Linkedin, Instagram } from "lucide-react";
+import { X, Youtube, Facebook, Twitch, Linkedin, Instagram, Play, RefreshCw, RotateCcw, Eye } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
 import { StreamEvent } from "@/types/event";
 
 interface PreviewModalProps {
@@ -29,6 +30,30 @@ const getDestinationIcon = (name: string) => {
 export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
   if (!event) return null;
 
+  const calculateDuration = (startTime: string) => {
+    const start = new Date(startTime);
+    const now = new Date();
+    const diffMs = now.getTime() - start.getTime();
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (hours > 0) {
+      return `${hours} hour${hours !== 1 ? 's' : ''} ${minutes} minute${minutes !== 1 ? 's' : ''}`;
+    }
+    return `${minutes} minute${minutes !== 1 ? 's' : ''}`;
+  };
+
+  const formatStartTime = (dateTime: string) => {
+    const date = new Date(dateTime);
+    return date.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
+  };
+
+  const hasError = event.destinations.some((d) => !d.connected || d.error);
+
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 overflow-hidden">
@@ -52,11 +77,45 @@ export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
           <div className="bg-card p-6 space-y-6">
             <div>
               <h2 className="text-2xl font-bold text-card-foreground mb-2">{event.title}</h2>
-              <div className="flex items-center gap-6 text-muted-foreground">
-                <span className="text-lg">{event.viewers.toLocaleString()} viewers</span>
+              <div className="flex items-center gap-6 text-muted-foreground mb-3">
+                <span className="text-lg flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  {event.viewers.toLocaleString()} viewers
+                </span>
                 <span>Admin: {event.admin}</span>
-                <span>{new Date(event.dateTime).toLocaleString()}</span>
               </div>
+              <p className="text-muted-foreground">
+                The event started at <span className="font-semibold">{formatStartTime(event.dateTime)}</span> and has been live for <span className="font-semibold">{calculateDuration(event.dateTime)}</span>.
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <Button size="lg" className="flex-1">
+                <Eye className="h-4 w-4 mr-2" />
+                Preview Stream
+              </Button>
+
+              {event.status === "not-live" && (
+                <Button size="lg" variant="secondary">
+                  <Play className="h-4 w-4 mr-2" />
+                  Start Stream
+                </Button>
+              )}
+
+              {event.status === "stream-freeze" && (
+                <Button size="lg" variant="secondary">
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh Stream
+                </Button>
+              )}
+
+              {hasError && (
+                <Button size="lg" variant="destructive">
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  Retry Connection
+                </Button>
+              )}
             </div>
 
             {/* Social Destinations - Prominent Display */}

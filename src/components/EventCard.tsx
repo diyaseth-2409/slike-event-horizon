@@ -1,4 +1,4 @@
-import { Pin, Eye, User, Play, RefreshCw, AlertTriangle, RotateCcw } from "lucide-react";
+import { Pin, AlertTriangle, Volume2 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -52,13 +52,16 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
   return (
     <Card
       className={cn(
-        "overflow-hidden transition-all hover:shadow-lg flex flex-col h-full",
+        "overflow-hidden transition-all hover:shadow-lg flex flex-col h-full cursor-pointer",
         event.status === "not-live" && "opacity-60",
         hasError && "ring-2 ring-destructive/50"
       )}
     >
-      {/* Thumbnail */}
-      <div className="relative w-full aspect-video">
+      {/* Thumbnail - Clickable */}
+      <div 
+        className="relative w-full aspect-video group"
+        onClick={() => onPreview(event)}
+      >
         <img
           src={event.thumbnail}
           alt={event.title}
@@ -69,10 +72,22 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
             <AlertTriangle className="h-10 w-10 text-destructive animate-pulse" />
           </div>
         )}
+        
+        {/* Status Badge - Top Left */}
+        <div className="absolute top-2 left-2">
+          <Badge className={cn(getStatusColor(event.status), "text-xs")}>
+            {getStatusLabel(event.status)}
+          </Badge>
+        </div>
+
+        {/* Pin Button - Top Right */}
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onTogglePin(event.id)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onTogglePin(event.id);
+          }}
           className={cn(
             "absolute top-2 right-2 bg-black/40 hover:bg-black/60",
             event.isPinned && "text-primary"
@@ -80,18 +95,9 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
         >
           <Pin className={cn("h-4 w-4 text-white", event.isPinned && "fill-current")} />
         </Button>
-      </div>
 
-      {/* Content */}
-      <div className="p-2 flex-1 flex flex-col">
-        <h3 className="font-semibold text-sm text-card-foreground line-clamp-2 mb-2">
-          {event.title}
-        </h3>
-
-        <div className="flex flex-wrap items-center gap-1 mb-2">
-          <Badge className={cn(getStatusColor(event.status), "text-xs py-0 h-5")}>
-            {getStatusLabel(event.status)}
-          </Badge>
+        {/* Destination Badges - Top Right (below pin) */}
+        <div className="absolute top-12 right-2 flex flex-col gap-1">
           {event.destinations.slice(0, 2).map((dest) => (
             <Badge
               key={dest.name}
@@ -101,53 +107,42 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
               {dest.name}
             </Badge>
           ))}
-          {event.destinations.length > 2 && (
-            <Badge variant="outline" className="text-xs py-0 h-5">
-              +{event.destinations.length - 2}
-            </Badge>
-          )}
         </div>
 
-        {isExpanded && (
-          <>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-2">
-              <span className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                {event.viewers.toLocaleString()}
-              </span>
-              <span className="flex items-center gap-1">
-                <User className="h-3 w-3" />
+        {/* Bottom Overlay with Product and Author */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3">
+          <div className="flex items-end justify-between gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-white/80 text-xs mb-1">
+                {event.destinations[0]?.name || "Product"}
+              </p>
+              <p className="text-white font-semibold text-sm truncate">
                 {event.admin}
-              </span>
+              </p>
             </div>
-            <span className="text-xs text-muted-foreground mb-2">{formatDateTime(event.dateTime)}</span>
-          </>
-        )}
-
-        <div className="flex gap-1 mt-auto">
-          <Button size="sm" onClick={() => onPreview(event)} className="flex-1 h-7 text-xs">
-            Preview
-          </Button>
-
-          {event.status === "not-live" && (
-            <Button size="sm" variant="secondary" className="h-7 w-7 p-0">
-              <Play className="h-3 w-3" />
-            </Button>
-          )}
-
-          {event.status === "stream-freeze" && (
-            <Button size="sm" variant="secondary" className="h-7 w-7 p-0">
-              <RefreshCw className="h-3 w-3" />
-            </Button>
-          )}
-
-          {hasError && (
-            <Button size="sm" variant="destructive" className="h-7 w-7 p-0">
-              <RotateCcw className="h-3 w-3" />
-            </Button>
-          )}
+            
+            {/* Sound Indicator */}
+            <div className="flex items-center gap-1 bg-success/20 px-2 py-1 rounded">
+              <Volume2 className="h-3 w-3 text-success" />
+              <div className="flex items-center gap-0.5">
+                <div className="w-0.5 h-2 bg-success rounded animate-pulse" style={{ animationDelay: '0ms' }} />
+                <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '150ms' }} />
+                <div className="w-0.5 h-4 bg-success rounded animate-pulse" style={{ animationDelay: '300ms' }} />
+                <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '450ms' }} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Content - Only Title when collapsed */}
+      {isExpanded && (
+        <div className="p-2">
+          <h3 className="font-semibold text-sm text-card-foreground line-clamp-2">
+            {event.title}
+          </h3>
+        </div>
+      )}
     </Card>
   );
 };
