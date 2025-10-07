@@ -3,6 +3,7 @@ import { StreamEvent } from "@/types/event";
 export const mockEvents: StreamEvent[] = [
   {
     id: "1",
+    eventId: "EVT-2025-001",
     title: "Live Gaming Session - Valorant Competitive",
     thumbnail: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=225&fit=crop",
     dateTime: new Date().toISOString(),
@@ -10,6 +11,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "John Doe",
     isPinned: true,
+    product: "TOI",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Facebook", icon: "facebook", connected: true },
@@ -18,6 +21,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "2",
+    eventId: "EVT-2025-002",
     title: "Tech Talk: Web Development Best Practices",
     thumbnail: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 3600000).toISOString(),
@@ -25,6 +29,8 @@ export const mockEvents: StreamEvent[] = [
     status: "low-views",
     admin: "Sarah Smith",
     isPinned: false,
+    product: "ET",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Twitch", icon: "twitch", connected: true },
@@ -32,6 +38,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "3",
+    eventId: "EVT-2025-003",
     title: "Music Performance - Live Concert",
     thumbnail: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 7200000).toISOString(),
@@ -39,6 +46,8 @@ export const mockEvents: StreamEvent[] = [
     status: "stream-freeze",
     admin: "Mike Johnson",
     isPinned: true,
+    product: "Navbharat Times",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Facebook", icon: "facebook", connected: false, error: "Stream key expired" },
@@ -46,6 +55,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "4",
+    eventId: "EVT-2025-004",
     title: "Cooking Show - Italian Cuisine",
     thumbnail: "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 10800000).toISOString(),
@@ -53,12 +63,15 @@ export const mockEvents: StreamEvent[] = [
     status: "low-interaction",
     admin: "Emily Brown",
     isPinned: false,
+    product: "TOI",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
     ],
   },
   {
     id: "5",
+    eventId: "EVT-2025-005",
     title: "Product Launch Event",
     thumbnail: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() + 3600000).toISOString(),
@@ -66,6 +79,8 @@ export const mockEvents: StreamEvent[] = [
     status: "not-live",
     admin: "David Lee",
     isPinned: false,
+    product: "ET",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "LinkedIn", icon: "linkedin", connected: true },
@@ -73,6 +88,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "6",
+    eventId: "EVT-2025-006",
     title: "Podcast Recording - Tech Insights",
     thumbnail: "https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 14400000).toISOString(),
@@ -80,12 +96,15 @@ export const mockEvents: StreamEvent[] = [
     status: "error",
     admin: "Lisa Wang",
     isPinned: false,
+    product: "Navbharat Times",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: false, error: "Authentication failed" },
     ],
   },
   {
     id: "7",
+    eventId: "EVT-2025-007",
     title: "Fitness Class - Morning Yoga",
     thumbnail: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 1800000).toISOString(),
@@ -93,6 +112,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "Rachel Green",
     isPinned: true,
+    product: "TOI",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Instagram", icon: "instagram", connected: true },
@@ -100,6 +121,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "8",
+    eventId: "EVT-2025-008",
     title: "Educational Webinar - AI Fundamentals",
     thumbnail: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 5400000).toISOString(),
@@ -107,6 +129,8 @@ export const mockEvents: StreamEvent[] = [
     status: "low-views",
     admin: "Tom Harris",
     isPinned: false,
+    product: "ET",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Zoom", icon: "zoom", connected: true },
@@ -114,6 +138,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "9",
+    eventId: "EVT-2025-009",
     title: "Gaming Tournament - League of Legends Finals",
     thumbnail: "https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 9000000).toISOString(),
@@ -121,6 +146,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "Alex Turner",
     isPinned: false,
+    product: "TOI",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Twitch", icon: "twitch", connected: true },
@@ -129,6 +156,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "10",
+    eventId: "EVT-2025-010",
     title: "Art Workshop - Digital Illustration Basics",
     thumbnail: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 12000000).toISOString(),
@@ -136,6 +164,8 @@ export const mockEvents: StreamEvent[] = [
     status: "low-interaction",
     admin: "Maria Garcia",
     isPinned: false,
+    product: "Navbharat Times",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Instagram", icon: "instagram", connected: true },
@@ -143,6 +173,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "11",
+    eventId: "EVT-2025-011",
     title: "Business Presentation - Q4 Results",
     thumbnail: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() + 7200000).toISOString(),
@@ -150,6 +181,8 @@ export const mockEvents: StreamEvent[] = [
     status: "not-live",
     admin: "Robert Chen",
     isPinned: false,
+    product: "ET",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "LinkedIn", icon: "linkedin", connected: true },
       { name: "YouTube", icon: "youtube", connected: true },
@@ -157,6 +190,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "12",
+    eventId: "EVT-2025-012",
     title: "Travel Vlog - Exploring Tokyo",
     thumbnail: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 16200000).toISOString(),
@@ -164,6 +198,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "Jennifer Lee",
     isPinned: false,
+    product: "TOI",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Instagram", icon: "instagram", connected: true },
@@ -171,6 +207,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "13",
+    eventId: "EVT-2025-013",
     title: "DIY Tutorial - Home Renovation Tips",
     thumbnail: "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 19800000).toISOString(),
@@ -178,12 +215,15 @@ export const mockEvents: StreamEvent[] = [
     status: "low-views",
     admin: "Chris Anderson",
     isPinned: false,
+    product: "ET",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
     ],
   },
   {
     id: "14",
+    eventId: "EVT-2025-014",
     title: "Movie Review - Latest Marvel Release",
     thumbnail: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 21600000).toISOString(),
@@ -191,6 +231,8 @@ export const mockEvents: StreamEvent[] = [
     status: "error",
     admin: "Sam Wilson",
     isPinned: false,
+    product: "Navbharat Times",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: false, error: "Server timeout" },
       { name: "Twitch", icon: "twitch", connected: false, error: "Invalid credentials" },
@@ -198,6 +240,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "15",
+    eventId: "EVT-2025-015",
     title: "Fashion Show - Spring Collection 2025",
     thumbnail: "https://images.unsplash.com/photo-1558769132-cb1aea1c0b49?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 25200000).toISOString(),
@@ -205,6 +248,8 @@ export const mockEvents: StreamEvent[] = [
     status: "stream-freeze",
     admin: "Sophie Martin",
     isPinned: false,
+    product: "TOI",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Instagram", icon: "instagram", connected: true },
@@ -213,6 +258,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "16",
+    eventId: "EVT-2025-016",
     title: "Science Experiment - Physics Demo",
     thumbnail: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 28800000).toISOString(),
@@ -220,6 +266,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "Dr. James Smith",
     isPinned: false,
+    product: "ET",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "LinkedIn", icon: "linkedin", connected: true },
@@ -227,6 +275,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "17",
+    eventId: "EVT-2025-017",
     title: "Pet Care Tips - Training Your Dog",
     thumbnail: "https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 32400000).toISOString(),
@@ -234,12 +283,15 @@ export const mockEvents: StreamEvent[] = [
     status: "low-interaction",
     admin: "Anna Brown",
     isPinned: false,
+    product: "Navbharat Times",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
     ],
   },
   {
     id: "18",
+    eventId: "EVT-2025-018",
     title: "Esports Championship - CS:GO Finals",
     thumbnail: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 36000000).toISOString(),
@@ -247,6 +299,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "Peter Johnson",
     isPinned: false,
+    product: "TOI",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Twitch", icon: "twitch", connected: true },
@@ -255,6 +309,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "19",
+    eventId: "EVT-2025-019",
     title: "Photography Masterclass - Portrait Techniques",
     thumbnail: "https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() + 10800000).toISOString(),
@@ -262,6 +317,8 @@ export const mockEvents: StreamEvent[] = [
     status: "not-live",
     admin: "Emma Davis",
     isPinned: false,
+    product: "ET",
+    sourceType: "RTMP Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Instagram", icon: "instagram", connected: true },
@@ -269,6 +326,7 @@ export const mockEvents: StreamEvent[] = [
   },
   {
     id: "20",
+    eventId: "EVT-2025-020",
     title: "News Broadcast - Daily Update",
     thumbnail: "https://images.unsplash.com/photo-1495020689067-958852a7765e?w=400&h=225&fit=crop",
     dateTime: new Date(Date.now() - 39600000).toISOString(),
@@ -276,6 +334,8 @@ export const mockEvents: StreamEvent[] = [
     status: "healthy",
     admin: "Michael Scott",
     isPinned: false,
+    product: "Navbharat Times",
+    sourceType: "Web Studio",
     destinations: [
       { name: "YouTube", icon: "youtube", connected: true },
       { name: "Facebook", icon: "facebook", connected: true },

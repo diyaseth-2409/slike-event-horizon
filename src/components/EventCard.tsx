@@ -109,26 +109,39 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
           ))}
         </div>
 
-        {/* Bottom Overlay with Product and Author */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent p-3">
-          <div className="flex items-end justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <p className="text-white/80 text-xs mb-1">
-                {event.destinations[0]?.name || "Product"}
-              </p>
-              <p className="text-white font-semibold text-sm truncate">
-                {event.admin}
-              </p>
+        {/* Bottom Overlay with Event Info */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3">
+          <div className="space-y-2">
+            {/* Top Row: Product and Source Type */}
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-white/90 text-xs font-medium bg-white/20 px-2 py-0.5 rounded">
+                {event.product}
+              </span>
+              <span className="text-white/80 text-xs bg-primary/30 px-2 py-0.5 rounded">
+                {event.sourceType}
+              </span>
             </div>
-            
-            {/* Sound Indicator */}
-            <div className="flex items-center gap-1 bg-success/20 px-2 py-1 rounded">
-              <Volume2 className="h-3 w-3 text-success" />
-              <div className="flex items-center gap-0.5">
-                <div className="w-0.5 h-2 bg-success rounded animate-pulse" style={{ animationDelay: '0ms' }} />
-                <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '150ms' }} />
-                <div className="w-0.5 h-4 bg-success rounded animate-pulse" style={{ animationDelay: '300ms' }} />
-                <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '450ms' }} />
+
+            {/* Bottom Row: Author, Event ID and Sound */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm truncate">
+                  {event.admin}
+                </p>
+                <p className="text-white/70 text-xs truncate">
+                  ID: {event.eventId}
+                </p>
+              </div>
+              
+              {/* Sound Indicator */}
+              <div className="flex items-center gap-1 bg-success/20 px-2 py-1 rounded">
+                <Volume2 className="h-3 w-3 text-success" />
+                <div className="flex items-center gap-0.5">
+                  <div className="w-0.5 h-2 bg-success rounded animate-pulse" style={{ animationDelay: '0ms' }} />
+                  <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '150ms' }} />
+                  <div className="w-0.5 h-4 bg-success rounded animate-pulse" style={{ animationDelay: '300ms' }} />
+                  <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '450ms' }} />
+                </div>
               </div>
             </div>
           </div>

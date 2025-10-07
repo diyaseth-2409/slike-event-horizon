@@ -15,6 +15,7 @@ export type Destination = {
 
 export interface StreamEvent {
   id: string;
+  eventId: string;
   title: string;
   thumbnail: string;
   dateTime: string;
@@ -23,4 +24,6 @@ export interface StreamEvent {
   admin: string;
   isPinned: boolean;
   destinations: Destination[];
+  product: string;
+  sourceType: "RTMP Studio" | "Web Studio";
 }

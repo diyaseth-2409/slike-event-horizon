@@ -76,13 +76,20 @@ export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
           {/* Info Panel Below Video */}
           <div className="bg-card p-6 space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-card-foreground mb-2">{event.title}</h2>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold text-card-foreground">{event.title}</h2>
+                <Badge variant="outline" className="text-sm">
+                  {event.sourceType}
+                </Badge>
+              </div>
               <div className="flex items-center gap-6 text-muted-foreground mb-3">
                 <span className="text-lg flex items-center gap-2">
                   <Eye className="h-5 w-5" />
                   {event.viewers.toLocaleString()} viewers
                 </span>
                 <span>Admin: {event.admin}</span>
+                <span>Event ID: {event.eventId}</span>
+                <span>Product: {event.product}</span>
               </div>
               <p className="text-muted-foreground">
                 The event started at <span className="font-semibold">{formatStartTime(event.dateTime)}</span> and has been live for <span className="font-semibold">{calculateDuration(event.dateTime)}</span>.
