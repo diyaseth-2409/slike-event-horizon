@@ -161,6 +161,8 @@ const Index = () => {
     <div className="flex min-h-screen w-full bg-background">
       <div className="flex-1 flex flex-col">
         <FilterBar
+          selectedStatuses={selectedStatuses}
+          statusCounts={allStatusCounts}
           timeFilter={timeFilter}
           destinationFilter={destinationFilter}
           adminFilter={adminFilter}
@@ -169,6 +171,7 @@ const Index = () => {
           searchQuery={searchQuery}
           gridColumns={gridColumns}
           cardsExpanded={cardsExpanded}
+          onStatusToggle={handleStatusToggle}
           onTimeFilterChange={setTimeFilter}
           onDestinationFilterChange={setDestinationFilter}
           onAdminFilterChange={setAdminFilter}
@@ -179,46 +182,6 @@ const Index = () => {
           onCardsExpandedChange={setCardsExpanded}
           onResetFilters={handleResetFilters}
         />
-
-        {/* Status Filter Nav */}
-        <div className="border-b border-border bg-card px-6 py-3">
-          <div className="flex items-center gap-3 flex-wrap">
-            <button
-              onClick={handleSelectAll}
-              className={cn(
-                "px-4 py-2 rounded-md text-sm font-medium transition-colors",
-                selectedStatuses.size === 0 
-                  ? "bg-primary text-primary-foreground" 
-                  : "bg-muted hover:bg-muted/80"
-              )}
-            >
-              All Events ({totalEvents})
-            </button>
-            
-            {[
-              { status: "healthy", label: "Healthy", count: statusCounts.healthy || 0, color: "bg-success" },
-              { status: "low-views", label: "Low Views", count: statusCounts["low-views"] || 0, color: "bg-warning" },
-              { status: "low-interaction", label: "Low Interaction", count: statusCounts["low-interaction"] || 0, color: "bg-warning" },
-              { status: "stream-freeze", label: "Stream Freeze", count: statusCounts["stream-freeze"] || 0, color: "bg-destructive" },
-              { status: "error", label: "Error", count: statusCounts.error || 0, color: "bg-destructive" },
-              { status: "not-live", label: "Not Live", count: statusCounts["not-live"] || 0, color: "bg-muted-foreground" },
-            ].map((item) => (
-              <button
-                key={item.status}
-                onClick={() => handleStatusToggle(item.status as EventStatus)}
-                className={cn(
-                  "px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center gap-2",
-                  selectedStatuses.has(item.status as EventStatus)
-                    ? "bg-accent border-2 border-primary"
-                    : "bg-muted hover:bg-muted/80"
-                )}
-              >
-                <span className={cn("w-2 h-2 rounded-full", item.color)} />
-                {item.label} ({item.count})
-              </button>
-            ))}
-          </div>
-        </div>
 
         <main className="flex-1 overflow-y-auto p-6">
           <div className="max-w-[1800px] mx-auto">
