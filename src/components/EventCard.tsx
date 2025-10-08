@@ -1,4 +1,4 @@
-import { Pin, AlertTriangle, Volume2 } from "lucide-react";
+import { Pin, AlertTriangle, Volume2, VolumeX } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -48,6 +48,32 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
   };
 
   const hasError = event.destinations.some((d) => !d.connected || d.error);
+
+  const getVoiceModulationColor = (modulation: string) => {
+    switch (modulation) {
+      case "good":
+        return "bg-success/20 text-success";
+      case "needs-review":
+        return "bg-yellow-500/20 text-yellow-500";
+      case "poor-connection":
+        return "bg-destructive/20 text-destructive";
+      default:
+        return "bg-success/20 text-success";
+    }
+  };
+
+  const getVoiceModulationIcon = (modulation: string) => {
+    switch (modulation) {
+      case "good":
+        return <Volume2 className="h-3 w-3" />;
+      case "needs-review":
+        return <Volume2 className="h-3 w-3" />;
+      case "poor-connection":
+        return <VolumeX className="h-3 w-3" />;
+      default:
+        return <Volume2 className="h-3 w-3" />;
+    }
+  };
 
   return (
     <Card
@@ -133,14 +159,34 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
                 </p>
               </div>
               
-              {/* Sound Indicator */}
-              <div className="flex items-center gap-1 bg-success/20 px-2 py-1 rounded">
-                <Volume2 className="h-3 w-3 text-success" />
+              {/* Voice Modulation Indicator */}
+              <div className={cn("flex items-center gap-1 px-2 py-1 rounded", getVoiceModulationColor(event.voiceModulation))}>
+                {getVoiceModulationIcon(event.voiceModulation)}
                 <div className="flex items-center gap-0.5">
-                  <div className="w-0.5 h-2 bg-success rounded animate-pulse" style={{ animationDelay: '0ms' }} />
-                  <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '150ms' }} />
-                  <div className="w-0.5 h-4 bg-success rounded animate-pulse" style={{ animationDelay: '300ms' }} />
-                  <div className="w-0.5 h-3 bg-success rounded animate-pulse" style={{ animationDelay: '450ms' }} />
+                  {event.voiceModulation === "good" && (
+                    <>
+                      <div className="w-0.5 h-2 bg-current rounded animate-pulse" style={{ animationDelay: '0ms' }} />
+                      <div className="w-0.5 h-3 bg-current rounded animate-pulse" style={{ animationDelay: '150ms' }} />
+                      <div className="w-0.5 h-4 bg-current rounded animate-pulse" style={{ animationDelay: '300ms' }} />
+                      <div className="w-0.5 h-3 bg-current rounded animate-pulse" style={{ animationDelay: '450ms' }} />
+                    </>
+                  )}
+                  {event.voiceModulation === "needs-review" && (
+                    <>
+                      <div className="w-0.5 h-2 bg-current rounded" />
+                      <div className="w-0.5 h-3 bg-current rounded" />
+                      <div className="w-0.5 h-2 bg-current rounded" />
+                      <div className="w-0.5 h-1 bg-current rounded" />
+                    </>
+                  )}
+                  {event.voiceModulation === "poor-connection" && (
+                    <>
+                      <div className="w-0.5 h-1 bg-current rounded" />
+                      <div className="w-0.5 h-1.5 bg-current rounded" />
+                      <div className="w-0.5 h-1 bg-current rounded" />
+                      <div className="w-0.5 h-0.5 bg-current rounded" />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
