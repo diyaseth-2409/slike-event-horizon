@@ -209,7 +209,7 @@ const Index = () => {
       case 6:
         return "grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6";
       case 8:
-        return "grid-cols-2 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8";
+        return "grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8";
       default:
         return "grid-cols-1 md:grid-cols-2 lg:grid-cols-3";
     }
@@ -219,7 +219,7 @@ const Index = () => {
     if (viewType === "horizontal") {
       return "flex overflow-x-auto gap-6 pb-4 scrollbar-hide";
     }
-    return `grid ${getGridClass()} gap-6`;
+    return `grid ${getGridClass()} gap-6 min-w-0`;
   };
 
   return (

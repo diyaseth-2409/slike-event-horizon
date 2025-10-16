@@ -95,29 +95,29 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
       </div>
 
       {/* Content Below Video */}
-      <div className="p-3 space-y-3">
+      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
         {/* Event Title */}
-        <h3 className="font-semibold text-sm text-card-foreground line-clamp-2">
+        <h3 className="font-semibold text-xs sm:text-sm text-card-foreground line-clamp-2">
           {event.title}
         </h3>
 
         {/* Event Details Row - Only show when expanded */}
         {isExpanded && (
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-xs text-muted-foreground truncate">
                 {event.admin}
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground hidden sm:inline">
                 •
               </span>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-muted-foreground truncate">
                 {event.eventId}
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <Volume2 className="h-3 w-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">
+              <Volume2 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+              <span className="text-xs text-muted-foreground truncate">
                 {event.viewers > 0 ? `${event.viewers} viewers` : 'Offline'}
               </span>
             </div>
@@ -126,27 +126,27 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
 
         {/* Destinations and Source Type - Only show when expanded */}
         {isExpanded && (
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             {/* Social Destinations */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap">
               {event.destinations.slice(0, 3).map((dest) => (
                 <Badge
                   key={dest.name}
                   variant={dest.connected ? "secondary" : "destructive"}
-                  className="text-xs h-5 px-1.5"
+                  className="text-xs h-5 px-1.5 flex-shrink-0"
                 >
                   {dest.name}
                 </Badge>
               ))}
               {event.destinations.length > 3 && (
-                <Badge variant="outline" className="text-xs h-5 px-1.5">
+                <Badge variant="outline" className="text-xs h-5 px-1.5 flex-shrink-0">
                   +{event.destinations.length - 3}
                 </Badge>
               )}
             </div>
 
             {/* Source Type */}
-            <Badge variant="outline" className="text-xs h-5 px-1.5">
+            <Badge variant="outline" className="text-xs h-5 px-1.5 flex-shrink-0">
               {event.sourceType}
             </Badge>
           </div>
