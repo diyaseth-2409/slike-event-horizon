@@ -1,4 +1,4 @@
-import { Calendar, Filter, ChevronDown, ChevronUp, Search, X } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "./ui/popover";
 import { Checkbox } from "./ui/checkbox";
+import { Switch } from "./ui/switch";
 import { ViewControls } from "./ViewControls";
 import { EventStatus } from "@/types/event";
 
@@ -22,46 +23,54 @@ interface FilterBarProps {
   selectedStatuses: Set<EventStatus>;
   statusCounts: Record<EventStatus, number>;
   timeFilter: string;
-  destinationFilter: string;
   adminFilter: string;
   productFilter: string;
   eventTypeFilter: string;
   searchQuery: string;
   gridColumns: number;
   cardsExpanded: boolean;
+  showMyEvents: boolean;
+  isFullscreen: boolean;
+  viewType: "vertical" | "horizontal";
   onStatusToggle: (status: EventStatus) => void;
   onTimeFilterChange: (value: string) => void;
-  onDestinationFilterChange: (value: string) => void;
   onAdminFilterChange: (value: string) => void;
   onProductFilterChange: (value: string) => void;
   onEventTypeFilterChange: (value: string) => void;
   onSearchChange: (value: string) => void;
   onGridColumnsChange: (columns: number) => void;
   onCardsExpandedChange: (expanded: boolean) => void;
+  onShowMyEventsChange: (showMyEvents: boolean) => void;
   onResetFilters: () => void;
+  onFullscreenToggle: (fullscreen: boolean) => void;
+  onViewTypeChange: (viewType: "vertical" | "horizontal") => void;
 }
 
 export const FilterBar = ({
   selectedStatuses,
   statusCounts,
   timeFilter,
-  destinationFilter,
   adminFilter,
   productFilter,
   eventTypeFilter,
   searchQuery,
   gridColumns,
   cardsExpanded,
+  showMyEvents,
+  isFullscreen,
+  viewType,
   onStatusToggle,
   onTimeFilterChange,
-  onDestinationFilterChange,
   onAdminFilterChange,
   onProductFilterChange,
   onEventTypeFilterChange,
   onSearchChange,
   onGridColumnsChange,
   onCardsExpandedChange,
+  onShowMyEventsChange,
   onResetFilters,
+  onFullscreenToggle,
+  onViewTypeChange,
 }: FilterBarProps) => {
   const totalEvents = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   
@@ -75,26 +84,43 @@ export const FilterBar = ({
   ];
 
   return (
-    <div className="sticky top-0 z-10 bg-card border-b border-border shadow-sm">
-      <div className="flex items-center gap-2 p-3 flex-wrap">
+    <div className="sticky top-0 z-10 bg-card shadow-sm">
+      <div className="flex items-center gap-2 px-2 py-2 overflow-x-auto scrollbar-hide">
         {/* Reset Filters Button */}
         <Button
           variant="ghost"
           size="sm"
           onClick={onResetFilters}
-          className="gap-2"
+          className="gap-2 text-[10px] flex-shrink-0"
         >
           <Filter className="h-4 w-4" />
-          <span className="text-sm font-medium">Filters</span>
+          <span className="font-medium">Filters</span>
         </Button>
+
+        {/* My Events / All Events Toggle */}
+        <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-md flex-shrink-0">
+          <div className="flex items-center gap-1">
+            <Users className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[10px] font-medium">All Events</span>
+          </div>
+          <Switch
+            checked={showMyEvents}
+            onCheckedChange={onShowMyEventsChange}
+            className="data-[state=checked]:bg-primary scale-75"
+          />
+          <div className="flex items-center gap-1">
+            <User className="h-3 w-3 text-muted-foreground" />
+            <span className="text-[10px] font-medium">My Events</span>
+          </div>
+        </div>
 
         {/* All Events Status Multi-Select */}
         <Popover>
           <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button variant="outline" size="sm" className="gap-2 text-[10px] flex-shrink-0">
               All Events
               {selectedStatuses.size > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5">
+                <Badge variant="secondary" className="ml-1 h-4 px-1 text-[9px]">
                   {selectedStatuses.size}
                 </Badge>
               )}
@@ -103,7 +129,7 @@ export const FilterBar = ({
           </PopoverTrigger>
           <PopoverContent className="w-64 p-3" align="start">
             <div className="space-y-2">
-              <div className="font-medium text-sm mb-3">Filter by Status ({totalEvents} total)</div>
+              <div className="font-medium text-[10px] mb-3">Filter by Status ({totalEvents} total)</div>
               {statusOptions.map((option) => (
                 <label
                   key={option.status}
@@ -114,8 +140,8 @@ export const FilterBar = ({
                     onCheckedChange={() => onStatusToggle(option.status)}
                   />
                   <span className={`w-2 h-2 rounded-full ${option.color}`} />
-                  <span className="flex-1 text-sm">{option.label}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="flex-1 text-[10px]">{option.label}</span>
+                  <span className="text-[9px] text-muted-foreground">
                     {statusCounts[option.status] || 0}
                   </span>
                 </label>
@@ -125,13 +151,13 @@ export const FilterBar = ({
         </Popover>
 
         {/* Search */}
-        <div className="relative w-48">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+        <div className="relative w-32 flex-shrink-0">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
           <Input
-            placeholder="Event ID..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-8 h-9 text-sm"
+            className="pl-6 h-8 text-[10px]"
           />
           {searchQuery && (
             <button
@@ -145,82 +171,86 @@ export const FilterBar = ({
 
         {/* Time Filter */}
         <Select value={timeFilter} onValueChange={onTimeFilterChange}>
-          <SelectTrigger className="w-36 h-9">
-            <Calendar className="h-3.5 w-3.5 mr-2" />
-            <SelectValue placeholder="Time" />
+          <SelectTrigger className="w-28 h-8 text-[10px] flex-shrink-0">
+            <Calendar className="h-3 w-3 mr-1" />
+            <SelectValue placeholder="All Time" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Time</SelectItem>
-            <SelectItem value="today">Today</SelectItem>
-            <SelectItem value="24h">Last 24 Hours</SelectItem>
-            <SelectItem value="7d">Last 7 Days</SelectItem>
+            <SelectItem value="all" className="text-[10px]">All Time</SelectItem>
+            <SelectItem value="today" className="text-[10px]">Today</SelectItem>
+            <SelectItem value="24h" className="text-[10px]">Last 24 Hours</SelectItem>
+            <SelectItem value="7d" className="text-[10px]">Last 7 Days</SelectItem>
           </SelectContent>
         </Select>
 
         {/* Product Filter */}
         <Select value={productFilter} onValueChange={onProductFilterChange}>
-          <SelectTrigger className="w-36 h-9">
-            <SelectValue placeholder="Product" />
+          <SelectTrigger className="w-32 h-8 text-[10px] flex-shrink-0">
+            <SelectValue placeholder="All Products" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Products</SelectItem>
-            <SelectItem value="TOI">TOI</SelectItem>
-            <SelectItem value="ET">ET</SelectItem>
-            <SelectItem value="Navbharat Times">Navbharat Times</SelectItem>
+            <SelectItem value="all" className="text-[10px]">All Products</SelectItem>
+            <SelectItem value="TOI" className="text-[10px]">TOI</SelectItem>
+            <SelectItem value="ET" className="text-[10px]">ET</SelectItem>
+            <SelectItem value="Navbharat Times" className="text-[10px]">Navbharat Times</SelectItem>
           </SelectContent>
         </Select>
 
         {/* Event Type Filter */}
         <Select value={eventTypeFilter} onValueChange={onEventTypeFilterChange}>
-          <SelectTrigger className="w-36 h-9">
-            <SelectValue placeholder="Event Type" />
+          <SelectTrigger className="w-32 h-8 text-[10px] flex-shrink-0">
+            <SelectValue placeholder="All Types" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="RTMP Studio">RTMP Studio</SelectItem>
-            <SelectItem value="Web Studio">Web Studio</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* Destination Filter */}
-        <Select value={destinationFilter} onValueChange={onDestinationFilterChange}>
-          <SelectTrigger className="w-36 h-9">
-            <SelectValue placeholder="Destination" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Destinations</SelectItem>
-            <SelectItem value="youtube">YouTube</SelectItem>
-            <SelectItem value="facebook">Facebook</SelectItem>
-            <SelectItem value="twitch">Twitch</SelectItem>
-            <SelectItem value="linkedin">LinkedIn</SelectItem>
-            <SelectItem value="instagram">Instagram</SelectItem>
+            <SelectItem value="all" className="text-[10px]">All Types</SelectItem>
+            <SelectItem value="RTMP Studio" className="text-[10px]">RTMP Studio</SelectItem>
+            <SelectItem value="Web Studio" className="text-[10px]">Web Studio</SelectItem>
+            <SelectItem value="Fast Channel" className="text-[10px]">Fast Channel</SelectItem>
           </SelectContent>
         </Select>
 
         {/* Admin Filter */}
         <Select value={adminFilter} onValueChange={onAdminFilterChange}>
-          <SelectTrigger className="w-36 h-9">
-            <SelectValue placeholder="Admin" />
+          <SelectTrigger className="w-24 h-8 text-[10px] flex-shrink-0">
+            <SelectValue placeholder="All Users" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Users</SelectItem>
-            <SelectItem value="john">John Doe</SelectItem>
-            <SelectItem value="sarah">Sarah Smith</SelectItem>
-            <SelectItem value="mike">Mike Johnson</SelectItem>
-            <SelectItem value="emily">Emily Brown</SelectItem>
+            <SelectItem value="all" className="text-[10px]">All Users</SelectItem>
+            <SelectItem value="john" className="text-[10px]">John Doe</SelectItem>
+            <SelectItem value="sarah" className="text-[10px]">Sarah Smith</SelectItem>
+            <SelectItem value="mike" className="text-[10px]">Mike Johnson</SelectItem>
+            <SelectItem value="emily" className="text-[10px]">Emily Brown</SelectItem>
           </SelectContent>
         </Select>
 
         {/* Right Side Controls */}
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => onCardsExpandedChange(!cardsExpanded)}
-            className="h-9"
+            className="h-8 px-2 text-[10px]"
           >
-            {cardsExpanded ? <ChevronUp className="h-3.5 w-3.5 mr-1.5" /> : <ChevronDown className="h-3.5 w-3.5 mr-1.5" />}
+            {cardsExpanded ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
             {cardsExpanded ? "Collapse" : "Expand"}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => onViewTypeChange(viewType === "vertical" ? "horizontal" : "vertical")}
+            className="h-8 w-8 p-0 text-[10px]"
+            title={viewType === "vertical" ? "Switch to Horizontal View" : "Switch to Vertical View"}
+          >
+            {viewType === "vertical" ? <List className="h-3 w-3" /> : <LayoutGrid className="h-3 w-3" />}
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => onFullscreenToggle(!isFullscreen)}
+            className="h-8 w-8 p-0 text-[10px]"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
           </Button>
           <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
         </div>

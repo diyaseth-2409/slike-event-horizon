@@ -1,4 +1,4 @@
-import { Pin, AlertTriangle, Volume2, VolumeX } from "lucide-react";
+import { Pin, AlertTriangle, Volume2 } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Card } from "./ui/card";
@@ -49,32 +49,6 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
 
   const hasError = event.destinations.some((d) => !d.connected || d.error);
 
-  const getVoiceModulationColor = (modulation: string) => {
-    switch (modulation) {
-      case "good":
-        return "bg-success/20 text-success";
-      case "needs-review":
-        return "bg-yellow-500/20 text-yellow-500";
-      case "poor-connection":
-        return "bg-destructive/20 text-destructive";
-      default:
-        return "bg-success/20 text-success";
-    }
-  };
-
-  const getVoiceModulationIcon = (modulation: string) => {
-    switch (modulation) {
-      case "good":
-        return <Volume2 className="h-3 w-3" />;
-      case "needs-review":
-        return <Volume2 className="h-3 w-3" />;
-      case "poor-connection":
-        return <VolumeX className="h-3 w-3" />;
-      default:
-        return <Volume2 className="h-3 w-3" />;
-    }
-  };
-
   return (
     <Card
       className={cn(
@@ -106,7 +80,7 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
           </Badge>
         </div>
 
-        {/* Pin Button - Top Right */}
+        {/* Pin Button - Only visible on hover */}
         <Button
           variant="ghost"
           size="icon"
@@ -114,94 +88,70 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
             e.stopPropagation();
             onTogglePin(event.id);
           }}
-          className={cn(
-            "absolute top-2 right-2 bg-black/40 hover:bg-black/60",
-            event.isPinned && "text-primary"
-          )}
+          className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         >
           <Pin className={cn("h-4 w-4 text-white", event.isPinned && "fill-current")} />
         </Button>
-
-        {/* Destination Badges - Top Right (below pin) */}
-        <div className="absolute top-12 right-2 flex flex-col gap-1">
-          {event.destinations.slice(0, 2).map((dest) => (
-            <Badge
-              key={dest.name}
-              variant={dest.connected ? "secondary" : "destructive"}
-              className="text-xs py-0 h-5"
-            >
-              {dest.name}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Bottom Overlay with Event Info */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-3">
-          <div className="space-y-2">
-            {/* Top Row: Product and Source Type */}
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-white/90 text-xs font-medium bg-white/20 px-2 py-0.5 rounded">
-                {event.product}
-              </span>
-              <span className="text-white/80 text-xs bg-primary/30 px-2 py-0.5 rounded">
-                {event.sourceType}
-              </span>
-            </div>
-
-            {/* Bottom Row: Author, Event ID and Sound */}
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm truncate">
-                  {event.admin}
-                </p>
-                <p className="text-white/70 text-xs truncate">
-                  ID: {event.eventId}
-                </p>
-              </div>
-              
-              {/* Voice Modulation Indicator */}
-              <div className={cn("flex items-center gap-1 px-2 py-1 rounded", getVoiceModulationColor(event.voiceModulation))}>
-                {getVoiceModulationIcon(event.voiceModulation)}
-                <div className="flex items-center gap-0.5">
-                  {event.voiceModulation === "good" && (
-                    <>
-                      <div className="w-0.5 h-2 bg-current rounded animate-pulse" style={{ animationDelay: '0ms' }} />
-                      <div className="w-0.5 h-3 bg-current rounded animate-pulse" style={{ animationDelay: '150ms' }} />
-                      <div className="w-0.5 h-4 bg-current rounded animate-pulse" style={{ animationDelay: '300ms' }} />
-                      <div className="w-0.5 h-3 bg-current rounded animate-pulse" style={{ animationDelay: '450ms' }} />
-                    </>
-                  )}
-                  {event.voiceModulation === "needs-review" && (
-                    <>
-                      <div className="w-0.5 h-2 bg-current rounded" />
-                      <div className="w-0.5 h-3 bg-current rounded" />
-                      <div className="w-0.5 h-2 bg-current rounded" />
-                      <div className="w-0.5 h-1 bg-current rounded" />
-                    </>
-                  )}
-                  {event.voiceModulation === "poor-connection" && (
-                    <>
-                      <div className="w-0.5 h-1 bg-current rounded" />
-                      <div className="w-0.5 h-1.5 bg-current rounded" />
-                      <div className="w-0.5 h-1 bg-current rounded" />
-                      <div className="w-0.5 h-0.5 bg-current rounded" />
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Content - Only Title when collapsed */}
-      {isExpanded && (
-        <div className="p-2">
-          <h3 className="font-semibold text-sm text-card-foreground line-clamp-2">
-            {event.title}
-          </h3>
-        </div>
-      )}
+      {/* Content Below Video */}
+      <div className="p-3 space-y-3">
+        {/* Event Title */}
+        <h3 className="font-semibold text-sm text-card-foreground line-clamp-2">
+          {event.title}
+        </h3>
+
+        {/* Event Details Row - Only show when expanded */}
+        {isExpanded && (
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {event.admin}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                •
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {event.eventId}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Volume2 className="h-3 w-3 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">
+                {event.viewers > 0 ? `${event.viewers} viewers` : 'Offline'}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Destinations and Source Type - Only show when expanded */}
+        {isExpanded && (
+          <div className="flex items-center justify-between gap-2">
+            {/* Social Destinations */}
+            <div className="flex items-center gap-1">
+              {event.destinations.slice(0, 3).map((dest) => (
+                <Badge
+                  key={dest.name}
+                  variant={dest.connected ? "secondary" : "destructive"}
+                  className="text-xs h-5 px-1.5"
+                >
+                  {dest.name}
+                </Badge>
+              ))}
+              {event.destinations.length > 3 && (
+                <Badge variant="outline" className="text-xs h-5 px-1.5">
+                  +{event.destinations.length - 3}
+                </Badge>
+              )}
+            </div>
+
+            {/* Source Type */}
+            <Badge variant="outline" className="text-xs h-5 px-1.5">
+              {event.sourceType}
+            </Badge>
+          </div>
+        )}
+      </div>
     </Card>
   );
 };

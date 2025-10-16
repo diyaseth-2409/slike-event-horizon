@@ -4,16 +4,18 @@ import { FilterBar } from "@/components/FilterBar";
 import { EventCard } from "@/components/EventCard";
 import { PreviewModal } from "@/components/PreviewModal";
 import { AutoScrollToggle } from "@/components/AutoScrollToggle";
+import { EventSubNav } from "@/components/EventSubNav";
 import { mockEvents } from "@/data/mockEvents";
 import { StreamEvent, EventStatus } from "@/types/event";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { X } from "lucide-react";
 
 const Index = () => {
   const [events, setEvents] = useState<StreamEvent[]>(mockEvents);
   const [selectedStatuses, setSelectedStatuses] = useState<Set<EventStatus>>(new Set());
   const [timeFilter, setTimeFilter] = useState("all");
-  const [destinationFilter, setDestinationFilter] = useState("all");
   const [adminFilter, setAdminFilter] = useState("all");
   const [productFilter, setProductFilter] = useState("all");
   const [eventTypeFilter, setEventTypeFilter] = useState("all");
@@ -23,6 +25,9 @@ const Index = () => {
   const [scrollInterval, setScrollInterval] = useState(5);
   const [gridColumns, setGridColumns] = useState(3);
   const [cardsExpanded, setCardsExpanded] = useState(false);
+  const [showMyEvents, setShowMyEvents] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [viewType, setViewType] = useState<"vertical" | "horizontal">("vertical");
 
   // Calculate status counts
   const statusCounts = events.reduce(
@@ -64,9 +69,25 @@ const Index = () => {
 
   // Filter events
   const filteredEvents = events.filter((event) => {
-    // Search by Event ID
-    if (searchQuery && !event.eventId.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
+    // My Events filter (show only events created by current user)
+    if (showMyEvents) {
+      // For demo purposes, assume current user is "John Doe"
+      // In a real app, this would be the actual current user
+      const currentUser = "John Doe";
+      if (event.createdBy !== currentUser && event.admin !== currentUser) {
+        return false;
+      }
+    }
+
+    // Search by Event ID or Event Title
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesEventId = event.eventId.toLowerCase().includes(searchLower);
+      const matchesTitle = event.title.toLowerCase().includes(searchLower);
+      
+      if (!matchesEventId && !matchesTitle) {
+        return false;
+      }
     }
 
     // Status filter
@@ -77,14 +98,6 @@ const Index = () => {
 
     // Event Type filter
     if (eventTypeFilter !== "all" && event.sourceType !== eventTypeFilter) return false;
-
-    // Destination filter
-    if (destinationFilter !== "all") {
-      const hasDestination = event.destinations.some(
-        (dest) => dest.name.toLowerCase() === destinationFilter.toLowerCase()
-      );
-      if (!hasDestination) return false;
-    }
 
     // Admin filter (basic implementation)
     if (adminFilter !== "all") {
@@ -100,8 +113,17 @@ const Index = () => {
   const unpinnedEvents = filteredEvents.filter((e) => !e.isPinned);
 
   const handleTogglePin = (id: string) => {
-    setEvents((prev) =>
-      prev.map((event) => {
+    setEvents((prev) => {
+      const currentPinnedCount = prev.filter(e => e.isPinned).length;
+      const eventToToggle = prev.find(e => e.id === id);
+      
+      // If trying to pin and already at limit (4), show warning
+      if (eventToToggle && !eventToToggle.isPinned && currentPinnedCount >= 4) {
+        toast.error("Maximum of 4 events can be pinned");
+        return prev;
+      }
+      
+      return prev.map((event) => {
         if (event.id === id) {
           const newPinnedState = !event.isPinned;
           toast.success(
@@ -110,13 +132,12 @@ const Index = () => {
           return { ...event, isPinned: newPinnedState };
         }
         return event;
-      })
-    );
+      });
+    });
   };
 
   const handleResetFilters = () => {
     setTimeFilter("all");
-    setDestinationFilter("all");
     setAdminFilter("all");
     setProductFilter("all");
     setEventTypeFilter("all");
@@ -127,6 +148,35 @@ const Index = () => {
 
   const handlePreview = (event: StreamEvent) => {
     setPreviewEvent(event);
+  };
+
+  const handleCategoryClick = (status: EventStatus) => {
+    // Toggle the status filter
+    setSelectedStatuses((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(status)) {
+        // If already selected, remove it (show all events)
+        newSet.delete(status);
+        toast.success(`Showing all events`);
+      } else {
+        // If not selected, select only this status (show only this status)
+        newSet.clear(); // Clear other selections
+        newSet.add(status); // Add this status
+        
+        // Create a more readable status name
+        const statusLabels: Record<EventStatus, string> = {
+          'healthy': 'Healthy',
+          'low-views': 'Low Views',
+          'low-interaction': 'Low Interaction',
+          'stream-freeze': 'Stream Freeze',
+          'error': 'Error',
+          'not-live': 'Not Live'
+        };
+        
+        toast.success(`Showing only ${statusLabels[status]} events`);
+      }
+      return newSet;
+    });
   };
 
   // Auto-scroll effect
@@ -157,33 +207,70 @@ const Index = () => {
     }
   };
 
+  const getContainerClass = () => {
+    if (viewType === "horizontal") {
+      return "flex overflow-x-auto gap-6 pb-4 scrollbar-hide";
+    }
+    return `grid ${getGridClass()} gap-6`;
+  };
+
   return (
     <div className="flex min-h-screen w-full bg-background">
       <div className="flex-1 flex flex-col">
-        <FilterBar
-          selectedStatuses={selectedStatuses}
-          statusCounts={allStatusCounts}
-          timeFilter={timeFilter}
-          destinationFilter={destinationFilter}
-          adminFilter={adminFilter}
-          productFilter={productFilter}
-          eventTypeFilter={eventTypeFilter}
-          searchQuery={searchQuery}
-          gridColumns={gridColumns}
-          cardsExpanded={cardsExpanded}
-          onStatusToggle={handleStatusToggle}
-          onTimeFilterChange={setTimeFilter}
-          onDestinationFilterChange={setDestinationFilter}
-          onAdminFilterChange={setAdminFilter}
-          onProductFilterChange={setProductFilter}
-          onEventTypeFilterChange={setEventTypeFilter}
-          onSearchChange={setSearchQuery}
-          onGridColumnsChange={setGridColumns}
-          onCardsExpandedChange={setCardsExpanded}
-          onResetFilters={handleResetFilters}
-        />
+        {!isFullscreen && (
+          <FilterBar
+            selectedStatuses={selectedStatuses}
+            statusCounts={allStatusCounts}
+            timeFilter={timeFilter}
+            adminFilter={adminFilter}
+            productFilter={productFilter}
+            eventTypeFilter={eventTypeFilter}
+            searchQuery={searchQuery}
+            gridColumns={gridColumns}
+            cardsExpanded={cardsExpanded}
+            showMyEvents={showMyEvents}
+            isFullscreen={isFullscreen}
+            viewType={viewType}
+            onStatusToggle={handleStatusToggle}
+            onTimeFilterChange={setTimeFilter}
+            onAdminFilterChange={setAdminFilter}
+            onProductFilterChange={setProductFilter}
+            onEventTypeFilterChange={setEventTypeFilter}
+            onSearchChange={setSearchQuery}
+            onGridColumnsChange={setGridColumns}
+            onCardsExpandedChange={setCardsExpanded}
+            onShowMyEventsChange={setShowMyEvents}
+            onResetFilters={handleResetFilters}
+            onFullscreenToggle={setIsFullscreen}
+            onViewTypeChange={setViewType}
+          />
+        )}
 
-        <main className="flex-1 overflow-y-auto p-6">
+        {/* Event Status Overview */}
+        {!isFullscreen && (
+          <EventSubNav 
+            events={events} 
+            onCategoryClick={handleCategoryClick}
+            selectedStatuses={selectedStatuses}
+          />
+        )}
+
+        {/* Fullscreen Exit Button */}
+        {isFullscreen && (
+          <div className="fixed top-4 right-4 z-50">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setIsFullscreen(false)}
+              className="h-8 w-8 p-0 bg-background/80 backdrop-blur-sm border shadow-lg"
+              title="Exit Fullscreen"
+            >
+              <X className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+
+        <main className={`flex-1 overflow-y-auto ${isFullscreen ? 'p-2' : 'p-6'}`}>
           <div className="max-w-[1800px] mx-auto">
             {pinnedEvents.length > 0 && (
               <div className="mb-8">
@@ -193,15 +280,16 @@ const Index = () => {
                     ({pinnedEvents.length})
                   </span>
                 </h2>
-                <div className={`grid ${getGridClass()} gap-6`}>
+                <div className={getContainerClass()}>
                   {pinnedEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onTogglePin={handleTogglePin}
-                      onPreview={handlePreview}
-                      isExpanded={cardsExpanded}
-                    />
+                    <div key={event.id} className={viewType === "horizontal" ? "flex-shrink-0 w-80" : ""}>
+                      <EventCard
+                        event={event}
+                        onTogglePin={handleTogglePin}
+                        onPreview={handlePreview}
+                        isExpanded={cardsExpanded}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -214,15 +302,16 @@ const Index = () => {
                     All Events
                   </h2>
                 )}
-                <div className={`grid ${getGridClass()} gap-6`}>
+                <div className={getContainerClass()}>
                   {unpinnedEvents.map((event) => (
-                    <EventCard
-                      key={event.id}
-                      event={event}
-                      onTogglePin={handleTogglePin}
-                      onPreview={handlePreview}
-                      isExpanded={cardsExpanded}
-                    />
+                    <div key={event.id} className={viewType === "horizontal" ? "flex-shrink-0 w-80" : ""}>
+                      <EventCard
+                        event={event}
+                        onTogglePin={handleTogglePin}
+                        onPreview={handlePreview}
+                        isExpanded={cardsExpanded}
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
