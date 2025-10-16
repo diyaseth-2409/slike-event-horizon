@@ -85,8 +85,9 @@ export const FilterBar = ({
   ];
 
   return (
-    <div className="sticky top-0 z-10 bg-card shadow-sm">
-      <div className="flex items-center gap-2 px-2 py-1 overflow-x-auto scrollbar-hide">
+    <div className="sticky top-0 z-10 bg-card shadow-sm w-full">
+      <div className="flex items-center justify-between px-2 py-1 w-full overflow-hidden">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 min-w-0">
         {/* Reset Filters Button */}
         <Button
           variant="ghost"
@@ -189,8 +190,10 @@ export const FilterBar = ({
           </SelectContent>
         </Select>
 
+        </div>
+        
         {/* Right Side Controls */}
-        <div className="ml-auto flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-1 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm"

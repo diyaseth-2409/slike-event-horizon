@@ -274,12 +274,6 @@ const Index = () => {
           <div className="max-w-[1800px] mx-auto">
             {pinnedEvents.length > 0 && (
               <div className="mb-8">
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2 mb-4">
-                  📌 Pinned Events
-                  <span className="text-sm text-muted-foreground font-normal">
-                    ({pinnedEvents.length})
-                  </span>
-                </h2>
                 <div className={getContainerClass()}>
                   {pinnedEvents.map((event) => (
                     <div key={event.id} className={viewType === "horizontal" ? "flex-shrink-0 w-80" : ""}>
@@ -297,11 +291,6 @@ const Index = () => {
 
             {unpinnedEvents.length > 0 && (
               <div>
-                {pinnedEvents.length > 0 && (
-                  <h2 className="text-lg font-semibold text-foreground mb-4">
-                    All Events
-                  </h2>
-                )}
                 <div className={getContainerClass()}>
                   {unpinnedEvents.map((event) => (
                     <div key={event.id} className={viewType === "horizontal" ? "flex-shrink-0 w-80" : ""}>
