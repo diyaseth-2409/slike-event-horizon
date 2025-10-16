@@ -61,8 +61,8 @@ export const EventSubNav = ({ events, onCategoryClick, selectedStatuses }: Event
   };
 
   return (
-    <div className="sticky top-[69px] z-10 bg-card shadow-sm">
-      <div className="flex items-center px-4 py-2 gap-4">
+    <div className="sticky top-[65px] -mt-px z-10 bg-card shadow-sm">
+      <div className="flex items-center px-4 py-2 gap-4" style={{ paddingTop: 0 }}>
         {/* Header */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <Play className="h-4 w-4 text-success" />

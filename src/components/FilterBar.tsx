@@ -1,4 +1,4 @@
-import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
@@ -75,6 +75,7 @@ export const FilterBar = ({
   const totalEvents = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   
   const statusOptions = [
+    { status: "all" as EventStatus, label: "All Events", color: "bg-blue-600" },
     { status: "healthy" as EventStatus, label: "Healthy", color: "bg-success" },
     { status: "low-views" as EventStatus, label: "Low Views", color: "bg-warning" },
     { status: "low-interaction" as EventStatus, label: "Low Interaction", color: "bg-warning" },
@@ -85,7 +86,7 @@ export const FilterBar = ({
 
   return (
     <div className="sticky top-0 z-10 bg-card shadow-sm">
-      <div className="flex items-center gap-2 px-2 py-2 overflow-x-auto scrollbar-hide">
+      <div className="flex items-center gap-2 px-2 py-1 overflow-x-auto scrollbar-hide">
         {/* Reset Filters Button */}
         <Button
           variant="ghost"
@@ -114,41 +115,6 @@ export const FilterBar = ({
           </div>
         </div>
 
-        {/* All Events Status Multi-Select */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-2 text-[10px] flex-shrink-0">
-              All Events
-              {selectedStatuses.size > 0 && (
-                <Badge variant="secondary" className="ml-1 h-4 px-1 text-[9px]">
-                  {selectedStatuses.size}
-                </Badge>
-              )}
-              <ChevronDown className="h-3 w-3" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64 p-3" align="start">
-            <div className="space-y-2">
-              <div className="font-medium text-[10px] mb-3">Filter by Status ({totalEvents} total)</div>
-              {statusOptions.map((option) => (
-                <label
-                  key={option.status}
-                  className="flex items-center gap-3 cursor-pointer hover:bg-muted p-2 rounded"
-                >
-                  <Checkbox
-                    checked={selectedStatuses.has(option.status)}
-                    onCheckedChange={() => onStatusToggle(option.status)}
-                  />
-                  <span className={`w-2 h-2 rounded-full ${option.color}`} />
-                  <span className="flex-1 text-[10px]">{option.label}</span>
-                  <span className="text-[9px] text-muted-foreground">
-                    {statusCounts[option.status] || 0}
-                  </span>
-                </label>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
 
         {/* Search */}
         <div className="relative w-32 flex-shrink-0">
@@ -253,6 +219,79 @@ export const FilterBar = ({
             {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
           </Button>
           <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
+        </div>
+      </div>
+      
+      {/* Event Status Overview - Integrated */}
+      <div className="flex items-center px-4 py-3 gap-4 border-t border-border/50">
+        {/* Header */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Play className="h-4 w-4 text-success" />
+          <span className="font-semibold text-sm">Event Status Overview</span>
+          <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
+            Total: {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
+          </Badge>
+        </div>
+        
+        {/* Category Badges - Scrollable */}
+        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1 pr-4 py-1">
+          {statusOptions.map((option) => {
+            const categoryEvents = option.status === "all" ? totalEvents : (statusCounts[option.status] || 0);
+            const isSelected = option.status === "all" ? selectedStatuses.size === 0 : selectedStatuses.has(option.status);
+            
+            const getCategoryIcon = (status: EventStatus) => {
+              switch (status) {
+                case "all": return <Users className="h-3 w-3" />;
+                case "healthy": return <Play className="h-3 w-3" />;
+                case "low-views": return <Eye className="h-3 w-3" />;
+                case "low-interaction": return <Users className="h-3 w-3" />;
+                case "stream-freeze": return <AlertTriangle className="h-3 w-3" />;
+                case "error": return <AlertTriangle className="h-3 w-3" />;
+                case "not-live": return <Volume2 className="h-3 w-3" />;
+                default: return null;
+              }
+            };
+
+            const getCategoryColor = (status: EventStatus) => {
+              switch (status) {
+                case "all": return "bg-blue-600 text-white hover:bg-blue-700";
+                case "healthy": return "bg-green-600 text-white hover:bg-green-700";
+                case "low-views": return "bg-orange-500 text-white hover:bg-orange-600";
+                case "low-interaction": return "bg-yellow-600 text-white hover:bg-yellow-700";
+                case "stream-freeze": return "bg-red-600 text-white hover:bg-red-700";
+                case "error": return "bg-red-700 text-white hover:bg-red-800";
+                case "not-live": return "bg-gray-600 text-white hover:bg-gray-700";
+                default: return "bg-gray-500 text-white hover:bg-gray-600";
+              }
+            };
+
+            const getCategoryLabel = (status: EventStatus) => {
+              switch (status) {
+                case "low-interaction": return "Low Int.";
+                default: return option.label;
+              }
+            };
+            
+            return (
+              <button
+                key={option.status}
+                onClick={() => onStatusToggle(option.status)}
+                className="flex items-center gap-1.5 cursor-pointer transition-all duration-200 hover:scale-105 flex-shrink-0"
+              >
+                <Badge 
+                  className={`${getCategoryColor(option.status)} text-sm h-7 px-3 font-semibold shadow-md border-0 ${
+                    isSelected ? "ring-2 ring-blue-400 ring-offset-1" : ""
+                  }`}
+                >
+                  {getCategoryIcon(option.status)}
+                  <span className="ml-1 whitespace-nowrap">{getCategoryLabel(option.status)}</span>
+                  <span className="ml-1.5 bg-white/30 px-1.5 py-0.5 rounded-full text-xs font-bold">
+                    {categoryEvents}
+                  </span>
+                </Badge>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

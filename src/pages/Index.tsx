@@ -4,7 +4,6 @@ import { FilterBar } from "@/components/FilterBar";
 import { EventCard } from "@/components/EventCard";
 import { PreviewModal } from "@/components/PreviewModal";
 import { AutoScrollToggle } from "@/components/AutoScrollToggle";
-import { EventSubNav } from "@/components/EventSubNav";
 import { mockEvents } from "@/data/mockEvents";
 import { StreamEvent, EventStatus } from "@/types/event";
 import { toast } from "sonner";
@@ -38,8 +37,12 @@ const Index = () => {
     {} as Record<EventStatus, number>
   );
 
+  // Calculate total events first
+  const totalEvents = Object.values(statusCounts).reduce((a, b) => a + b, 0);
+
   // Ensure all statuses have a count
   const allStatusCounts: Record<EventStatus, number> = {
+    all: totalEvents,
     healthy: 0,
     "low-views": 0,
     "low-interaction": 0,
@@ -49,17 +52,21 @@ const Index = () => {
     ...statusCounts,
   };
 
-  const totalEvents = Object.values(allStatusCounts).reduce((a, b) => a + b, 0);
-
   const handleStatusToggle = (status: EventStatus) => {
     setSelectedStatuses((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(status)) {
-        newSet.delete(status);
+      if (status === "all") {
+        // If "all" is clicked, clear all selections to show all events
+        return new Set();
       } else {
-        newSet.add(status);
+        // If a specific status is clicked, clear "all" and toggle the specific status
+        const newSet = new Set(prev);
+        if (newSet.has(status)) {
+          newSet.delete(status);
+        } else {
+          newSet.add(status);
+        }
+        return newSet;
       }
-      return newSet;
     });
   };
 
@@ -165,6 +172,7 @@ const Index = () => {
         
         // Create a more readable status name
         const statusLabels: Record<EventStatus, string> = {
+          'all': 'All Events',
           'healthy': 'Healthy',
           'low-views': 'Low Views',
           'low-interaction': 'Low Interaction',
@@ -215,8 +223,8 @@ const Index = () => {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-background">
-      <div className="flex-1 flex flex-col">
+    <div className="flex h-screen w-full bg-background">
+      <div className="flex-1 flex flex-col min-h-0">
         {!isFullscreen && (
           <FilterBar
             selectedStatuses={selectedStatuses}
@@ -246,14 +254,6 @@ const Index = () => {
           />
         )}
 
-        {/* Event Status Overview */}
-        {!isFullscreen && (
-          <EventSubNav 
-            events={events} 
-            onCategoryClick={handleCategoryClick}
-            selectedStatuses={selectedStatuses}
-          />
-        )}
 
         {/* Fullscreen Exit Button */}
         {isFullscreen && (
@@ -270,7 +270,7 @@ const Index = () => {
           </div>
         )}
 
-        <main className={`flex-1 overflow-y-auto ${isFullscreen ? 'p-2' : 'p-6'}`}>
+        <main className={`flex-1 overflow-y-auto ${isFullscreen ? 'p-2' : 'p-6 pb-20'}`}>
           <div className="max-w-[1800px] mx-auto">
             {pinnedEvents.length > 0 && (
               <div className="mb-8">

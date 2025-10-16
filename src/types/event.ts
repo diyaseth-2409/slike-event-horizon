@@ -1,4 +1,5 @@
 export type EventStatus = 
+  | "all"
   | "healthy" 
   | "low-views" 
   | "low-interaction" 
