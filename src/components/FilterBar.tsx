@@ -1,4 +1,5 @@
-import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2 } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2, Video, FileVideo, Columns, Rows, Minimize2, Maximize2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Badge } from "./ui/badge";
@@ -32,6 +33,7 @@ interface FilterBarProps {
   showMyEvents: boolean;
   isFullscreen: boolean;
   viewType: "vertical" | "horizontal";
+  autoScroll: boolean;
   onStatusToggle: (status: EventStatus) => void;
   onTimeFilterChange: (value: string) => void;
   onAdminFilterChange: (value: string) => void;
@@ -42,7 +44,7 @@ interface FilterBarProps {
   onCardsExpandedChange: (expanded: boolean) => void;
   onShowMyEventsChange: (showMyEvents: boolean) => void;
   onResetFilters: () => void;
-  onFullscreenToggle: (fullscreen: boolean) => void;
+  onFullscreenToggle: () => void;
   onViewTypeChange: (viewType: "vertical" | "horizontal") => void;
 }
 
@@ -59,6 +61,7 @@ export const FilterBar = ({
   showMyEvents,
   isFullscreen,
   viewType,
+  autoScroll,
   onStatusToggle,
   onTimeFilterChange,
   onAdminFilterChange,
@@ -72,6 +75,7 @@ export const FilterBar = ({
   onFullscreenToggle,
   onViewTypeChange,
 }: FilterBarProps) => {
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const totalEvents = Object.values(statusCounts).reduce((a, b) => a + b, 0);
   
   const statusOptions = [
@@ -85,9 +89,145 @@ export const FilterBar = ({
   ];
 
   return (
-    <div className="sticky top-0 z-10 bg-card shadow-sm w-full">
-      <div className="flex items-center justify-between px-2 py-1 w-full overflow-hidden">
+    <div className={`sticky top-0 z-10 bg-card shadow-sm ${isFullscreen ? 'shadow-none border-b-2' : ''}`}>
+      {/* Event Status Overview - Above Filters */}
+      <div className={`px-4 border-b border-border/50 ${isFullscreen ? 'py-1' : 'py-3'}`}>
+        {/* Single Row with Title and Status Boxes */}
+        <div className="flex items-center gap-4">
+          {/* Category Badges - Full Width */}
+          <div className="flex items-center gap-4 flex-1">
+          {statusOptions.map((option) => {
+            const categoryEvents = option.status === "all" ? totalEvents : (statusCounts[option.status] || 0);
+            const isSelected = option.status === "all" ? selectedStatuses.size === 0 : selectedStatuses.has(option.status);
+            
+            const getCategoryIcon = (status: EventStatus, isSelected: boolean) => {
+              if (status === "error") {
+                const iconClass = isSelected ? "h-4 w-4 text-white" : "h-4 w-4 text-red-600";
+                return <AlertTriangle className={iconClass} />;
+              }
+              return null;
+            };
+
+            const getCategoryColor = (status: EventStatus, isSelected: boolean) => {
+              if (status === "all") {
+                // Special styling for "All Events"
+                if (isSelected) {
+                  return "bg-blue-600 text-white hover:bg-blue-700 border border-blue-600 shadow-lg";
+                }
+                return "bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200";
+              }
+              
+              if (status === "error") {
+                // Special styling for "Error"
+                if (isSelected) {
+                  return "bg-red-600 text-white hover:bg-red-700 border border-red-600 shadow-lg";
+                }
+                return "bg-red-50 text-red-800 hover:bg-red-100 border border-red-200";
+              }
+              
+              if (isSelected) {
+                return "bg-gray-800 text-white hover:bg-gray-900 border border-gray-800 shadow-lg";
+              }
+              return "bg-gray-100 text-gray-900 hover:bg-gray-200 border border-gray-300";
+            };
+
+            const getCategoryLabel = (status: EventStatus) => {
+              switch (status) {
+                case "low-interaction": return "Low Int.";
+                case "stream-freeze": return "Freeze";
+                default: return option.label;
+              }
+            };
+            
+            return (
+              <button
+                key={option.status}
+                onClick={() => onStatusToggle(option.status)}
+                className="flex items-center gap-1.5 cursor-pointer transition-all duration-200 hover:scale-105 min-w-0 flex-1"
+              >
+                <Badge 
+                  className={`${getCategoryColor(option.status, isSelected)} text-sm font-semibold rounded-lg min-w-0 flex-1 flex items-center justify-between ${isFullscreen ? 'h-10 px-3' : 'h-14 px-4 sm:px-6'}`}
+                >
+                  <div className="flex items-center gap-2">
+                    {getCategoryIcon(option.status, isSelected)}
+                    <span className="whitespace-nowrap">{getCategoryLabel(option.status)}</span>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-sm font-bold flex-shrink-0 ${
+                    option.status === "all"
+                      ? (isSelected 
+                          ? "bg-white/30 text-white" 
+                          : "bg-blue-200 text-blue-800")
+                      : option.status === "error"
+                      ? (isSelected 
+                          ? "bg-white/30 text-white" 
+                          : "bg-red-200 text-red-800")
+                      : (isSelected 
+                          ? "bg-white/30 text-white" 
+                          : "bg-gray-200 text-gray-700")
+                  }`}>
+                    {categoryEvents}
+                  </span>
+                </Badge>
+              </button>
+            );
+          })}
+          </div>
+        </div>
+      </div>
+      
+      {/* Filters Section - Below Event Status Overview */}
+      <div className={`flex items-center gap-3 px-3 w-full overflow-hidden ${isFullscreen ? 'py-1' : 'py-2'}`}>
+        {/* Search - Left Side, Bigger */}
+        <div className="relative flex-shrink-0">
+          {!isSearchExpanded ? (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsSearchExpanded(true)}
+              className="gap-2 h-9 px-4 border-dashed hover:border-solid transition-all"
+            >
+              <Search className="h-4 w-4" />
+              <span className="font-medium text-sm">Search events...</span>
+            </Button>
+          ) : (
+            <div className="relative w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search events..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="pl-9 pr-9 h-9 text-sm border-primary focus:border-primary"
+                autoFocus
+                onBlur={() => {
+                  if (!searchQuery) {
+                    setIsSearchExpanded(false);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setIsSearchExpanded(false);
+                    onSearchChange("");
+                  }
+                }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => {
+                    onSearchChange("");
+                    setIsSearchExpanded(false);
+                  }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* All Other Filters - Right Side */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 min-w-0">
+        
         {/* Reset Filters Button */}
         <Button
           variant="ghost"
@@ -114,26 +254,6 @@ export const FilterBar = ({
             <User className="h-3 w-3 text-muted-foreground" />
             <span className="text-[10px] font-medium">My Events</span>
           </div>
-        </div>
-
-
-        {/* Search */}
-        <div className="relative w-32 flex-shrink-0">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
-          <Input
-            placeholder="Search..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-6 h-8 text-[10px]"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => onSearchChange("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
         </div>
 
         {/* Time Filter */}
@@ -192,16 +312,43 @@ export const FilterBar = ({
 
         </div>
         
+            {/* Pagination Controls for Horizontal View */}
+            {viewType === "horizontal" && !autoScroll && (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <Button variant="outline" size="sm" disabled className="h-8 px-2 text-xs">
+                  ← Previous
+                </Button>
+                <div className="flex gap-1">
+                  <Button variant="default" size="sm" className="h-8 w-8 p-0 text-xs">1</Button>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-xs">2</Button>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-xs">3</Button>
+                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-xs">4</Button>
+                </div>
+                <Button variant="outline" size="sm" className="h-8 px-2 text-xs">
+                  Next →
+                </Button>
+              </div>
+            )}
+        
         {/* Right Side Controls */}
         <div className="flex items-center gap-1 flex-shrink-0">
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => onCardsExpandedChange(!cardsExpanded)}
-            className="h-8 px-2 text-[10px]"
+            onClick={onFullscreenToggle}
+            className="h-8 w-8 p-0 text-[10px]"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            {cardsExpanded ? <ChevronUp className="h-3 w-3 mr-1" /> : <ChevronDown className="h-3 w-3 mr-1" />}
-            {cardsExpanded ? "Collapse" : "Expand"}
+            {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+          </Button>
+          <Button 
+            variant="outline"
+            size="sm"
+            onClick={() => onCardsExpandedChange(!cardsExpanded)}
+            className="h-8 w-8 p-0"
+            title={cardsExpanded ? "Compact view" : "Detailed view"}
+          >
+            {cardsExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
           <Button 
             variant="outline" 
@@ -210,91 +357,9 @@ export const FilterBar = ({
             className="h-8 w-8 p-0 text-[10px]"
             title={viewType === "vertical" ? "Switch to Horizontal View" : "Switch to Vertical View"}
           >
-            {viewType === "vertical" ? <List className="h-3 w-3" /> : <LayoutGrid className="h-3 w-3" />}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onFullscreenToggle(!isFullscreen)}
-            className="h-8 w-8 p-0 text-[10px]"
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-          >
-            {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+            {viewType === "vertical" ? <Rows className="h-4 w-4" /> : <Columns className="h-4 w-4" />}
           </Button>
           <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
-        </div>
-      </div>
-      
-      {/* Event Status Overview - Integrated */}
-      <div className="flex items-center px-4 py-3 gap-4 border-t border-border/50">
-        {/* Header */}
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <Play className="h-4 w-4 text-success" />
-          <span className="font-semibold text-sm">Event Status Overview</span>
-          <Badge variant="outline" className="ml-2 bg-blue-50 text-blue-700 border-blue-200">
-            Total: {Object.values(statusCounts).reduce((a, b) => a + b, 0)}
-          </Badge>
-        </div>
-        
-        {/* Category Badges - Scrollable */}
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide flex-1 pr-4 py-1">
-          {statusOptions.map((option) => {
-            const categoryEvents = option.status === "all" ? totalEvents : (statusCounts[option.status] || 0);
-            const isSelected = option.status === "all" ? selectedStatuses.size === 0 : selectedStatuses.has(option.status);
-            
-            const getCategoryIcon = (status: EventStatus) => {
-              switch (status) {
-                case "all": return <Users className="h-3 w-3" />;
-                case "healthy": return <Play className="h-3 w-3" />;
-                case "low-views": return <Eye className="h-3 w-3" />;
-                case "low-interaction": return <Users className="h-3 w-3" />;
-                case "stream-freeze": return <AlertTriangle className="h-3 w-3" />;
-                case "error": return <AlertTriangle className="h-3 w-3" />;
-                case "not-live": return <Volume2 className="h-3 w-3" />;
-                default: return null;
-              }
-            };
-
-            const getCategoryColor = (status: EventStatus) => {
-              switch (status) {
-                case "all": return "bg-blue-600 text-white hover:bg-blue-700";
-                case "healthy": return "bg-green-600 text-white hover:bg-green-700";
-                case "low-views": return "bg-orange-500 text-white hover:bg-orange-600";
-                case "low-interaction": return "bg-yellow-600 text-white hover:bg-yellow-700";
-                case "stream-freeze": return "bg-red-600 text-white hover:bg-red-700";
-                case "error": return "bg-red-700 text-white hover:bg-red-800";
-                case "not-live": return "bg-gray-600 text-white hover:bg-gray-700";
-                default: return "bg-gray-500 text-white hover:bg-gray-600";
-              }
-            };
-
-            const getCategoryLabel = (status: EventStatus) => {
-              switch (status) {
-                case "low-interaction": return "Low Int.";
-                default: return option.label;
-              }
-            };
-            
-            return (
-              <button
-                key={option.status}
-                onClick={() => onStatusToggle(option.status)}
-                className="flex items-center gap-1.5 cursor-pointer transition-all duration-200 hover:scale-105 flex-shrink-0"
-              >
-                <Badge 
-                  className={`${getCategoryColor(option.status)} text-sm h-7 px-3 font-semibold shadow-md border-0 ${
-                    isSelected ? "ring-2 ring-blue-400 ring-offset-1" : ""
-                  }`}
-                >
-                  {getCategoryIcon(option.status)}
-                  <span className="ml-1 whitespace-nowrap">{getCategoryLabel(option.status)}</span>
-                  <span className="ml-1.5 bg-white/30 px-1.5 py-0.5 rounded-full text-xs font-bold">
-                    {categoryEvents}
-                  </span>
-                </Badge>
-              </button>
-            );
-          })}
         </div>
       </div>
     </div>

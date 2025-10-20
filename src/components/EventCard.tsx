@@ -10,9 +10,10 @@ interface EventCardProps {
   onTogglePin: (id: string) => void;
   onPreview: (event: StreamEvent) => void;
   isExpanded: boolean;
+  viewType?: "vertical" | "horizontal";
 }
 
-export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCardProps) => {
+export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType = "vertical" }: EventCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "healthy":
@@ -59,7 +60,10 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
     >
       {/* Thumbnail - Clickable */}
       <div 
-        className="relative w-full aspect-video group"
+        className={cn(
+          "relative w-full group",
+          viewType === "horizontal" ? "aspect-video" : "aspect-video"
+        )}
         onClick={() => onPreview(event)}
       >
         <img
@@ -95,9 +99,15 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded }: EventCa
       </div>
 
       {/* Content Below Video */}
-      <div className="p-2 sm:p-3 space-y-2 sm:space-y-3">
+      <div className={cn(
+        "space-y-2",
+        viewType === "horizontal" ? "p-2 space-y-1" : "p-2 sm:p-3 space-y-2 sm:space-y-3"
+      )}>
         {/* Event Title */}
-        <h3 className="font-semibold text-xs sm:text-sm text-card-foreground line-clamp-2">
+        <h3 className={cn(
+          "font-semibold text-card-foreground",
+          viewType === "horizontal" ? "text-xs line-clamp-1" : "text-xs sm:text-sm line-clamp-2"
+        )}>
           {event.title}
         </h3>
 
