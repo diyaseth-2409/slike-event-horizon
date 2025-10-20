@@ -9,7 +9,7 @@ import { StreamEvent, EventStatus } from "@/types/event";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { X, ChevronLeft, ChevronRight } from "lucide-react";
 
 const Index = () => {
   const [events, setEvents] = useState<StreamEvent[]>(mockEvents);
@@ -28,6 +28,10 @@ const Index = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [viewType, setViewType] = useState<"vertical" | "horizontal">("vertical");
   const [currentPage, setCurrentPage] = useState(0);
+
+  console.log("Index component - events:", events.length, "mockEvents:", mockEvents.length);
+  console.log("First event:", events[0]);
+  console.log("MockEvents first:", mockEvents[0]);
 
   // Browser fullscreen functionality
   const toggleFullscreen = async () => {
@@ -74,7 +78,7 @@ const Index = () => {
   }, []);
   
   // Debug logging
-  console.log("Current viewType:", viewType);
+  console.log("Current viewType:", viewType, "gridColumns:", gridColumns);
   
 
   // Calculate status counts
@@ -194,6 +198,12 @@ const Index = () => {
   };
   
   const displayEvents = getDisplayEvents();
+  
+  console.log("Filtered events:", filteredEvents.length);
+  console.log("Display events:", displayEvents.length);
+  console.log("Selected statuses:", selectedStatuses);
+  console.log("Search query:", searchQuery);
+  console.log("Show my events:", showMyEvents);
 
 
   const handleTogglePin = (id: string) => {
@@ -281,13 +291,59 @@ const Index = () => {
 
     const interval = setInterval(() => {
       setCurrentPage((prevPage) => {
-        const totalPages = Math.ceil((displayEvents.length - pinnedEvents.length) / 12); // 4 videos per row * 3 rows
+        // Calculate videos to show based on grid selection
+        let videosToShow = 0;
+        if (isFullscreen) {
+          // Use fullscreen logic
+          switch (gridColumns) {
+            case 2:
+              videosToShow = 4;
+              break;
+            case 3:
+              videosToShow = 6;
+              break;
+            case 4:
+              videosToShow = 8;
+              break;
+            case 6:
+              videosToShow = 12;
+              break;
+            case 8:
+              videosToShow = 16;
+              break;
+            default:
+              videosToShow = 4;
+          }
+        } else {
+          // Use normal mode logic
+          switch (gridColumns) {
+            case 2:
+              videosToShow = 2;
+              break;
+            case 3:
+              videosToShow = 6;
+              break;
+            case 4:
+              videosToShow = 8;
+              break;
+            case 6:
+              videosToShow = 18;
+              break;
+            case 8:
+              videosToShow = 32;
+              break;
+            default:
+              videosToShow = 8;
+          }
+        }
+        
+        const totalPages = Math.ceil(displayEvents.length / videosToShow);
         return (prevPage + 1) % totalPages;
       });
     }, 5000); // 5 seconds
 
     return () => clearInterval(interval);
-  }, [autoScroll, viewType, displayEvents.length, pinnedEvents.length]);
+  }, [autoScroll, viewType, displayEvents.length, gridColumns, isFullscreen]);
 
   const getGridClass = () => {
     if (isFullscreen) {
@@ -326,7 +382,14 @@ const Index = () => {
   };
 
   const getContainerClass = () => {
-    const gapClass = isFullscreen ? 'gap-2' : 'gap-6';
+    let gapClass;
+    if (isFullscreen) {
+      gapClass = 'gap-2';
+    } else if (viewType === "horizontal") {
+      gapClass = cardsExpanded ? 'gap-6' : 'gap-4';
+    } else {
+      gapClass = cardsExpanded ? 'gap-8' : 'gap-6';
+    }
     return `grid ${getGridClass()} ${gapClass} min-w-0`;
   };
 
@@ -364,9 +427,9 @@ const Index = () => {
         )}
 
 
-        {/* Fullscreen Exit Button */}
+        {/* Fullscreen Exit Button - Only visible on hover */}
         {isFullscreen && (
-          <div className="fixed top-4 right-4 z-50">
+          <div className="fixed top-4 right-4 z-50 opacity-0 hover:opacity-100 transition-opacity duration-200">
             <Button 
               variant="outline" 
               size="sm"
@@ -379,185 +442,271 @@ const Index = () => {
           </div>
         )}
 
-        <main className={`flex-1 overflow-y-auto ${isFullscreen ? 'p-0' : 'p-6 pb-20'}`}>
-          <div className={`${isFullscreen ? 'w-full h-full' : viewType === "horizontal" && !autoScroll ? 'w-full px-2' : 'max-w-[1800px] mx-auto'}`}>
+        <main className={`flex-1 ${viewType === "horizontal" ? 'overflow-hidden' : 'overflow-y-auto'} ${isFullscreen ? 'p-1' : viewType === "horizontal" ? 'p-6 pb-8' : 'p-6 pb-20'}`}>
+          <div className={`${isFullscreen ? (viewType === "vertical" ? 'w-full h-full' : 'w-full h-[95vh] flex items-center justify-center') : viewType === "horizontal" && !autoScroll ? 'w-full px-2 overflow-x-hidden' : 'max-w-[1800px] mx-auto'}`}>
             {displayEvents.length > 0 && (
               <div>
-                {viewType === "horizontal" ? (
-                  // Horizontal layout with auto-scroll or pagination
+                {isFullscreen && viewType === "vertical" ? (
+                  // Fullscreen vertical view - same as normal grid but fullscreen
                   <div>
-                        {autoScroll ? (
-                          // Auto-scrolling multi-row horizontal layout
-                          <div 
-                            className="flex flex-col gap-4"
-                            style={{
-                              animation: `scroll-horizontal 15s ease-in-out infinite`
-                            }}
-                          >
-                            {(() => {
-                              const rows = [];
-                              const videosPerRow = 4;
-                              const totalRows = 3;
-                              
-                              // First row: Pinned videos + fill with unpinned
-                              const firstRowVideos = [];
-                              const unpinnedEvents = displayEvents.filter(event => !event.isPinned);
-                              
-                              // Add all pinned videos first
-                              firstRowVideos.push(...pinnedEvents.slice(0, 4));
-                              
-                              // Fill remaining slots with unpinned videos
-                              const remainingSlots = 4 - firstRowVideos.length;
-                              if (remainingSlots > 0) {
-                                const fillVideos = unpinnedEvents.slice(0, remainingSlots);
-                                firstRowVideos.push(...fillVideos);
-                              }
-                              
-                              // Duplicate events to create seamless scrolling
-                              const duplicatedFirstRow = [...firstRowVideos, ...firstRowVideos, ...firstRowVideos];
-                              
-                              rows.push(
-                                <div key={0} className="flex gap-4">
-                                  {duplicatedFirstRow.map((event, index) => (
-                                    <div key={`${event.id}-${index}`} className="flex-shrink-0 w-80">
-                                      <EventCard
-                                        event={event}
-                                        onTogglePin={handleTogglePin}
-                                        onPreview={handlePreview}
-                                        isExpanded={cardsExpanded}
-                                        viewType={viewType}
-                                      />
-                                    </div>
-                                  ))}
+                    <div className={getContainerClass()}>
+                      {displayEvents.map((event) => (
+                        <div key={event.id}>
+                          <EventCard
+                            event={event}
+                            onTogglePin={handleTogglePin}
+                            onPreview={handlePreview}
+                            isExpanded={cardsExpanded}
+                            viewType={viewType}
+                            gridColumns={gridColumns}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : isFullscreen || viewType === "horizontal" ? (
+                  // Horizontal layout with fixed video counts based on grid
+                  <div>
+                    {(() => {
+                      // Calculate videos to show based on grid selection
+                      let videosToShow = 0;
+                      let videosPerRow = gridColumns;
+                      let totalRows = 0;
+                      
+                      // Helper function to get height class based on total rows for 16:9 aspect ratio
+                      const getRowHeightClass = () => {
+                        if (isFullscreen) {
+                          // In fullscreen, make videos fill most of the screen height
+                          switch (totalRows) {
+                            case 1:
+                              return 'h-[85vh]'; // Single row takes most of the screen
+                            case 2:
+                              return 'h-[42vh]'; // Two rows, each taking ~42vh
+                            case 3:
+                              return 'h-[28vh]'; // Three rows, each taking ~28vh
+                            case 4:
+                              return 'h-[21vh]'; // Four rows, each taking ~21vh
+                            default:
+                              return 'h-[42vh]';
+                          }
+                        } else {
+                          // Normal mode
+                          switch (totalRows) {
+                            case 1:
+                              return 'h-[50vh]';
+                            case 2:
+                              return 'h-[24vh]';
+                            case 3:
+                              return 'h-[16vh]';
+                            case 4:
+                              return 'h-[12vh]';
+                            default:
+                              return 'h-[24vh]';
+                          }
+                        }
+                      };
+                      
+                      // In fullscreen, show videos based on grid selection
+                      if (isFullscreen) {
+                        switch (gridColumns) {
+                          case 2:
+                            videosToShow = 4; // 4 cards in 2x2 grid
+                            videosPerRow = 2;
+                            totalRows = 2;
+                            break;
+                          case 3:
+                            videosToShow = 6; // 6 cards total (3 per row, 2 rows)
+                            videosPerRow = 3;
+                            totalRows = 2;
+                            break;
+                          case 4:
+                            videosToShow = 8; // 8 cards total (4 per row, 2 rows)
+                            videosPerRow = 4;
+                            totalRows = 2;
+                            break;
+                          case 6:
+                            videosToShow = 12; // 12 cards total (6 per row, 2 rows)
+                            videosPerRow = 6;
+                            totalRows = 2;
+                            break;
+                          case 8:
+                            videosToShow = 16; // 16 cards total (8 per row, 2 rows)
+                            videosPerRow = 8;
+                            totalRows = 2;
+                            break;
+                          default:
+                            videosToShow = 4; // Default to 4 cards in 2x2 grid
+                            videosPerRow = 2;
+                            totalRows = 2;
+                        }
+                      } else {
+                        // Normal mode
+                        switch (gridColumns) {
+                          case 2:
+                            videosToShow = 2;
+                            totalRows = 1;
+                            break;
+                          case 3:
+                            videosToShow = 6;
+                            totalRows = 2;
+                            break;
+                          case 4:
+                            videosToShow = 8;
+                            totalRows = 2;
+                            break;
+                          case 6:
+                            videosToShow = 18;
+                            totalRows = 3;
+                            break;
+                          case 8:
+                            videosToShow = 32;
+                            totalRows = 4;
+                            break;
+                          default:
+                            videosToShow = 8;
+                            totalRows = 2;
+                        }
+                      }
+                      
+                      if (autoScroll) {
+                        // Auto-scroll mode: show videos that rotate every 5 seconds
+                        const startIndex = currentPage * videosToShow;
+                        const gridEvents = displayEvents.slice(startIndex, startIndex + videosToShow);
+                        
+                        console.log("Fullscreen mode - videosToShow:", videosToShow, "gridEvents:", gridEvents.length, "displayEvents:", displayEvents.length);
+                        
+                        // Create rows for grid display
+                        const rows = [];
+                        for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
+                          const rowStartIndex = rowIndex * videosPerRow;
+                          const rowEvents = gridEvents.slice(rowStartIndex, rowStartIndex + videosPerRow);
+                          
+                          rows.push(
+                            <div key={rowIndex} className={`flex gap-1 w-full overflow-x-hidden ${isFullscreen ? `${getRowHeightClass()} mb-1` : 'gap-2 mb-2'}`}>
+                              {rowEvents.map((event) => (
+                                <div key={event.id} className={`flex-1 ${isFullscreen ? getRowHeightClass() : ''}`}>
+                                  <EventCard
+                                    event={event}
+                                    onTogglePin={handleTogglePin}
+                                    onPreview={handlePreview}
+                                    isExpanded={cardsExpanded}
+                                    viewType={viewType}
+                                    gridColumns={gridColumns}
+                                  />
                                 </div>
-                              );
-                              
-                              // Remaining rows: Only unpinned videos
-                              const firstRowUnpinnedCount = Math.max(0, 4 - pinnedEvents.length);
-                              for (let rowIndex = 1; rowIndex < totalRows; rowIndex++) {
-                                const rowStartIndex = firstRowUnpinnedCount + ((rowIndex - 1) * videosPerRow);
-                                const rowEvents = unpinnedEvents.slice(rowStartIndex, rowStartIndex + videosPerRow);
-                                if (rowEvents.length === 0) break;
-                                
-                                // Duplicate events to create seamless scrolling
-                                const duplicatedEvents = [...rowEvents, ...rowEvents, ...rowEvents];
-                                
-                                rows.push(
-                                  <div key={rowIndex} className="flex gap-4">
-                                    {duplicatedEvents.map((event, index) => (
-                                      <div key={`${event.id}-${index}`} className="flex-shrink-0 w-80">
-                                        <EventCard
-                                          event={event}
-                                          onTogglePin={handleTogglePin}
-                                          onPreview={handlePreview}
-                                          isExpanded={cardsExpanded}
-                                          viewType={viewType}
-                                        />
-                                      </div>
-                                    ))}
-                                  </div>
-                                );
-                              }
-                              return rows;
-                            })()}
+                              ))}
+                              {/* Fill remaining slots if row is not full */}
+                              {Array.from({ length: videosPerRow - rowEvents.length }, (_, i) => (
+                                <div key={`empty-${rowIndex}-${i}`} className={`flex-1 ${isFullscreen ? getRowHeightClass() : ''}`}></div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        
+                        return (
+                          <div className={`flex flex-col ${isFullscreen ? 'gap-0' : 'gap-3'}`}>
+                            {rows}
                           </div>
-                    ) : (
-                      // Pagination layout when auto-scroll is off - Edge to edge
-                      <div className="flex flex-col gap-3 w-full">
-                        {/* First Row - Pinned Videos + Fill with Unpinned */}
-                        <div className="flex gap-2 w-full">
-                          {(() => {
-                            const unpinnedEvents = displayEvents.filter(event => !event.isPinned);
-                            const firstRowVideos = [];
-                            
-                            // Add all pinned videos first
-                            firstRowVideos.push(...pinnedEvents.slice(0, 4));
-                            
-                            // Fill remaining slots with unpinned videos
-                            const remainingSlots = 4 - firstRowVideos.length;
-                            if (remainingSlots > 0) {
-                              const startIndex = currentPage * 12; // Skip videos that will be shown in other rows
-                              const fillVideos = unpinnedEvents.slice(startIndex, startIndex + remainingSlots);
-                              firstRowVideos.push(...fillVideos);
-                            }
-                            
-                            return firstRowVideos.map((event, index) => (
-                              <div key={event.id} className="flex-1">
+                        );
+                      } else {
+                        // Static mode: show videos in grid format with pagination
+                        const startIndex = currentPage * videosToShow;
+                        const gridEvents = displayEvents.slice(startIndex, startIndex + videosToShow);
+                        
+                        console.log("Static mode - videosToShow:", videosToShow, "gridEvents:", gridEvents.length, "displayEvents:", displayEvents.length, "isFullscreen:", isFullscreen);
+                        
+                        const rows = [];
+                        for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
+                          const rowStartIndex = rowIndex * videosPerRow;
+                          const rowEvents = gridEvents.slice(rowStartIndex, rowStartIndex + videosPerRow);
+                          
+                          rows.push(
+                            <div key={rowIndex} className={`flex gap-1 w-full overflow-x-hidden ${isFullscreen ? `${getRowHeightClass()} mb-1` : 'gap-2 mb-2'}`}>
+                              {rowEvents.map((event) => (
+                                <div key={event.id} className={`flex-1 ${isFullscreen ? getRowHeightClass() : ''}`}>
+                                  <EventCard
+                                    event={event}
+                                    onTogglePin={handleTogglePin}
+                                    onPreview={handlePreview}
+                                    isExpanded={cardsExpanded}
+                                    viewType={viewType}
+                                    gridColumns={gridColumns}
+                                  />
+                                </div>
+                              ))}
+                              {/* Fill remaining slots if row is not full */}
+                              {Array.from({ length: videosPerRow - rowEvents.length }, (_, i) => (
+                                <div key={`empty-${rowIndex}-${i}`} className={`flex-1 ${isFullscreen ? getRowHeightClass() : ''}`}></div>
+                              ))}
+                            </div>
+                          );
+                        }
+                        
+                        // Calculate total pages for pagination
+                        const totalPages = Math.ceil(displayEvents.length / videosToShow);
+                        
+                        return (
+                          <div className="flex flex-col w-full overflow-x-hidden">
+                            {/* Main Content Area with Navigation Arrows in Middle */}
+                            {isFullscreen && viewType === "vertical" ? (
+                              // In fullscreen vertical view, just show the grid without arrows
+                              <div className="flex flex-col flex-1 min-w-0 gap-0">
+                                {rows}
+                              </div>
+                            ) : (
+                              // In horizontal view or non-fullscreen, show arrows
+                              <div className={`flex items-center justify-center ${isFullscreen ? 'gap-2' : 'gap-6'}`}>
+                                {/* Left Pagination Button - Positioned in middle */}
+                                <div className="flex-shrink-0 flex items-center justify-center">
+                                  Page {currentPage + 1} of {totalPages}
+                                </div>
+                                
+                                {/* Video Grid */}
+                                <div className={`flex flex-col flex-1 min-w-0 ${isFullscreen ? 'gap-0' : 'gap-2'}`}>
+                                  {rows}
+                                </div>
+                                
+                                {/* Right Pagination Button - Positioned in middle */}
+                                <div className="flex-shrink-0 flex items-center justify-center">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
+                                    disabled={currentPage >= totalPages - 1}
+                                    className={`${isFullscreen ? 'h-10 w-10' : 'h-14 w-14'} p-0 rounded-full shadow-xl border-2 transition-all duration-200 ${
+                                      currentPage >= totalPages - 1 
+                                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                                        : 'bg-blue-500 text-white hover:bg-blue-600 hover:scale-105'
+                                    }`}
+                                    title="Next page"
+                                  >
+                                    <ChevronRight className={`${isFullscreen ? 'h-4 w-4' : 'h-6 w-6'}`} />
+                                  </Button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                ) : (
+                  // Normal grid layout
+                  <div>
+                    <div className={getContainerClass()}>
+                      {displayEvents.map((event) => (
+                        <div key={event.id}>
                                 <EventCard
                                   event={event}
                                   onTogglePin={handleTogglePin}
                                   onPreview={handlePreview}
                                   isExpanded={cardsExpanded}
                                   viewType={viewType}
+                                  gridColumns={gridColumns}
                                 />
-                              </div>
-                            ));
-                          })()}
-                          
-                          {/* Fill any remaining empty slots */}
-                          {(() => {
-                            const totalFirstRowVideos = Math.min(4, pinnedEvents.length + Math.max(0, 4 - pinnedEvents.length));
-                            return Array.from({ length: 4 - totalFirstRowVideos }, (_, i) => (
-                              <div key={`empty-first-${i}`} className="flex-1"></div>
-                            ));
-                          })()}
                         </div>
-                        
-                        {/* Remaining Rows - Only Unpinned Videos */}
-                        {(() => {
-                          const rows = [];
-                          const videosPerRow = 4;
-                          const totalRows = 2; // Only 2 more rows since first row is handled above
-                          const unpinnedEvents = displayEvents.filter(event => !event.isPinned);
-                          
-                          // Calculate start index for remaining rows (skip videos used in first row)
-                          const firstRowUnpinnedCount = Math.max(0, 4 - pinnedEvents.length);
-                          const startIndex = (currentPage * 12) + firstRowUnpinnedCount;
-                          
-                          for (let rowIndex = 0; rowIndex < totalRows; rowIndex++) {
-                            const rowStartIndex = startIndex + (rowIndex * videosPerRow);
-                            const rowEvents = unpinnedEvents.slice(rowStartIndex, rowStartIndex + videosPerRow);
-                            if (rowEvents.length === 0) break;
-                            
-                            rows.push(
-                              <div key={rowIndex + 1} className="flex gap-2 w-full">
-                                {rowEvents.map((event) => (
-                                  <div key={event.id} className="flex-1">
-                                    <EventCard
-                                      event={event}
-                                      onTogglePin={handleTogglePin}
-                                      onPreview={handlePreview}
-                                      isExpanded={cardsExpanded}
-                                      viewType={viewType}
-                                    />
-                                  </div>
-                                ))}
-                                {/* Fill remaining slots */}
-                                {Array.from({ length: videosPerRow - rowEvents.length }, (_, i) => (
-                                  <div key={`empty-${rowIndex + 1}-${i}`} className="flex-1"></div>
-                                ))}
-                              </div>
-                            );
-                          }
-                          return rows;
-                        })()}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  // Normal grid layout
-                  <div className={getContainerClass()}>
-                    {displayEvents.map((event) => (
-                      <div key={event.id}>
-                        <EventCard
-                          event={event}
-                          onTogglePin={handleTogglePin}
-                          onPreview={handlePreview}
-                          isExpanded={cardsExpanded}
-                          viewType={viewType}
-                        />
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

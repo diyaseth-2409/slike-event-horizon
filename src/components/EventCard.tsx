@@ -11,9 +11,10 @@ interface EventCardProps {
   onPreview: (event: StreamEvent) => void;
   isExpanded: boolean;
   viewType?: "vertical" | "horizontal";
+  gridColumns?: number;
 }
 
-export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType = "vertical" }: EventCardProps) => {
+export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType = "vertical", gridColumns = 4 }: EventCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "healthy":
@@ -53,7 +54,7 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType 
   return (
     <Card
       className={cn(
-        "overflow-hidden transition-all hover:shadow-lg flex flex-col h-full cursor-pointer",
+        "overflow-hidden transition-all hover:shadow-lg flex flex-col cursor-pointer",
         event.status === "not-live" && "opacity-60",
         hasError && "ring-2 ring-destructive/50"
       )}
@@ -61,8 +62,7 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType 
       {/* Thumbnail - Clickable */}
       <div 
         className={cn(
-          "relative w-full group",
-          viewType === "horizontal" ? "aspect-video" : "aspect-video"
+          "relative w-full group aspect-video"
         )}
         onClick={() => onPreview(event)}
       >
@@ -100,65 +100,134 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType 
 
       {/* Content Below Video */}
       <div className={cn(
-        "space-y-2",
-        viewType === "horizontal" ? "p-2 space-y-1" : "p-2 sm:p-3 space-y-2 sm:space-y-3"
+        "space-y-2 flex-shrink-0",
+        viewType === "horizontal" ? "p-1 space-y-0.5" : 
+        (gridColumns >= 8) ? "p-1 space-y-0.5" : 
+        (gridColumns >= 6) ? "p-1.5 space-y-0.5" : "p-2 sm:p-3 space-y-2 sm:space-y-3"
       )}>
         {/* Event Title */}
         <h3 className={cn(
           "font-semibold text-card-foreground",
-          viewType === "horizontal" ? "text-xs line-clamp-1" : "text-xs sm:text-sm line-clamp-2"
+          viewType === "horizontal" ? "text-sm line-clamp-1" : 
+          (gridColumns >= 8) ? "text-xs line-clamp-1" :
+          (gridColumns >= 6) ? "text-xs line-clamp-1" : "text-xs sm:text-sm line-clamp-2"
         )}>
           {event.title}
         </h3>
 
         {/* Event Details Row - Only show when expanded */}
         {isExpanded && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <span className="text-xs text-muted-foreground truncate">
-                {event.admin}
-              </span>
-              <span className="text-xs text-muted-foreground hidden sm:inline">
-                •
-              </span>
-              <span className="text-xs text-muted-foreground truncate">
-                {event.eventId}
-              </span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Volume2 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-              <span className="text-xs text-muted-foreground truncate">
-                {event.viewers > 0 ? `${event.viewers} viewers` : 'Offline'}
-              </span>
-            </div>
+          <div className={cn(
+            "flex flex-col",
+            (gridColumns >= 6) ? "gap-0.5" : "gap-1 sm:gap-2"
+          )}>
+            {gridColumns >= 6 ? (
+              // Ultra compact layout for narrow grids
+              <div className="flex items-center gap-1">
+                <span className="text-xs text-muted-foreground truncate">
+                  {gridColumns >= 8 ? event.admin.split(' ')[0] : event.admin}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  •
+                </span>
+                <span className="text-xs text-muted-foreground truncate">
+                  {event.eventId}
+                </span>
+              </div>
+            ) : (
+              // Normal layout for wider grids
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
+                  <span className="text-xs text-muted-foreground truncate">
+                    {event.admin}
+                  </span>
+                  <span className="text-xs text-muted-foreground hidden sm:inline">
+                    •
+                  </span>
+                  <span className="text-xs text-muted-foreground truncate">
+                    {event.eventId}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Volume2 className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    {event.viewers > 0 ? `${event.viewers} viewers` : 'Offline'}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
         {/* Destinations and Source Type - Only show when expanded */}
         {isExpanded && (
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            {/* Social Destinations */}
-            <div className="flex items-center gap-1 flex-wrap">
-              {event.destinations.slice(0, 3).map((dest) => (
-                <Badge
-                  key={dest.name}
-                  variant={dest.connected ? "secondary" : "destructive"}
-                  className="text-xs h-5 px-1.5 flex-shrink-0"
+          <div className={cn(
+            "flex flex-col sm:flex-row sm:items-center sm:justify-between",
+            (gridColumns >= 6) ? "gap-0.5" : "gap-2"
+          )}>
+            {gridColumns >= 6 ? (
+              // Ultra compact layout for narrow grids
+              <div className="flex items-center gap-1 flex-wrap">
+                {event.destinations.slice(0, 1).map((dest) => (
+                  <Badge
+                    key={dest.name}
+                    variant={dest.connected ? "secondary" : "destructive"}
+                    className={cn(
+                      "text-xs flex-shrink-0",
+                      gridColumns >= 8 ? "h-2.5 px-0.5" : "h-3 px-1"
+                    )}
+                  >
+                    {gridColumns >= 8 ? dest.name.slice(0, 3) : dest.name}
+                  </Badge>
+                ))}
+                {event.destinations.length > 1 && (
+                  <Badge 
+                    variant="outline" 
+                    className={cn(
+                      "text-xs flex-shrink-0",
+                      gridColumns >= 8 ? "h-2.5 px-0.5" : "h-3 px-1"
+                    )}
+                  >
+                    +{event.destinations.length - 1}
+                  </Badge>
+                )}
+                <Badge 
+                  variant="outline" 
+                  className={cn(
+                    "text-xs flex-shrink-0",
+                    gridColumns >= 8 ? "h-2.5 px-0.5" : "h-3 px-1"
+                  )}
                 >
-                  {dest.name}
+                  {gridColumns >= 8 ? event.sourceType.slice(0, 3) : event.sourceType}
                 </Badge>
-              ))}
-              {event.destinations.length > 3 && (
-                <Badge variant="outline" className="text-xs h-5 px-1.5 flex-shrink-0">
-                  +{event.destinations.length - 3}
-                </Badge>
-              )}
-            </div>
+              </div>
+            ) : (
+              // Normal layout for wider grids
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                {/* Social Destinations */}
+                <div className="flex items-center gap-1 flex-wrap">
+                  {event.destinations.slice(0, 3).map((dest) => (
+                    <Badge
+                      key={dest.name}
+                      variant={dest.connected ? "secondary" : "destructive"}
+                      className="text-xs h-5 px-1.5 flex-shrink-0"
+                    >
+                      {dest.name}
+                    </Badge>
+                  ))}
+                  {event.destinations.length > 3 && (
+                    <Badge variant="outline" className="text-xs h-5 px-1.5 flex-shrink-0">
+                      +{event.destinations.length - 3}
+                    </Badge>
+                  )}
+                </div>
 
-            {/* Source Type */}
-            <Badge variant="outline" className="text-xs h-5 px-1.5 flex-shrink-0">
-              {event.sourceType}
-            </Badge>
+                {/* Source Type */}
+                <Badge variant="outline" className="text-xs h-5 px-1.5 flex-shrink-0">
+                  {event.sourceType}
+                </Badge>
+              </div>
+            )}
           </div>
         )}
       </div>

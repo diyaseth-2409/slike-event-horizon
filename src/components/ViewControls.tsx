@@ -13,77 +13,61 @@ interface ViewControlsProps {
 }
 
 export const ViewControls = ({ gridColumns, onGridColumnsChange }: ViewControlsProps) => {
-  // Custom grid icons for 4, 6, 8 columns
+  // Custom grid icons showing exact number of squares with better design
+  const CustomGrid2 = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="4" y="6" width="6" height="6" rx="1"/>
+      <rect x="14" y="6" width="6" height="6" rx="1"/>
+    </svg>
+  );
+
+  const CustomGrid3 = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2" y="6" width="5" height="6" rx="1"/>
+      <rect x="9.5" y="6" width="5" height="6" rx="1"/>
+      <rect x="17" y="6" width="5" height="6" rx="1"/>
+    </svg>
+  );
+
   const CustomGrid4 = ({ className }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="3" width="7" height="7"/>
-      <rect x="14" y="3" width="7" height="7"/>
-      <rect x="3" y="14" width="7" height="7"/>
-      <rect x="14" y="14" width="7" height="7"/>
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="4" y="4" width="6" height="6" rx="1"/>
+      <rect x="14" y="4" width="6" height="6" rx="1"/>
+      <rect x="4" y="14" width="6" height="6" rx="1"/>
+      <rect x="14" y="14" width="6" height="6" rx="1"/>
     </svg>
   );
 
   const CustomGrid6 = ({ className }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <rect x="3" y="3" width="5" height="5"/>
-      <rect x="10" y="3" width="5" height="5"/>
-      <rect x="17" y="3" width="4" height="5"/>
-      <rect x="3" y="10" width="5" height="5"/>
-      <rect x="10" y="10" width="5" height="5"/>
-      <rect x="17" y="10" width="4" height="5"/>
-      <rect x="3" y="17" width="5" height="4"/>
-      <rect x="10" y="17" width="5" height="4"/>
-      <rect x="17" y="17" width="4" height="4"/>
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <rect x="2" y="4" width="5" height="6" rx="1"/>
+      <rect x="9.5" y="4" width="5" height="6" rx="1"/>
+      <rect x="17" y="4" width="5" height="6" rx="1"/>
+      <rect x="2" y="14" width="5" height="6" rx="1"/>
+      <rect x="9.5" y="14" width="5" height="6" rx="1"/>
+      <rect x="17" y="14" width="5" height="6" rx="1"/>
     </svg>
   );
 
   const CustomGrid8 = ({ className }: { className?: string }) => (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <rect x="2" y="2" width="2.5" height="2.5"/>
-      <rect x="5.5" y="2" width="2.5" height="2.5"/>
-      <rect x="9" y="2" width="2.5" height="2.5"/>
-      <rect x="12.5" y="2" width="2.5" height="2.5"/>
-      <rect x="16" y="2" width="2.5" height="2.5"/>
-      <rect x="19.5" y="2" width="2.5" height="2.5"/>
-      <rect x="2" y="5.5" width="2.5" height="2.5"/>
-      <rect x="5.5" y="5.5" width="2.5" height="2.5"/>
-      <rect x="9" y="5.5" width="2.5" height="2.5"/>
-      <rect x="12.5" y="5.5" width="2.5" height="2.5"/>
-      <rect x="16" y="5.5" width="2.5" height="2.5"/>
-      <rect x="19.5" y="5.5" width="2.5" height="2.5"/>
-      <rect x="2" y="9" width="2.5" height="2.5"/>
-      <rect x="5.5" y="9" width="2.5" height="2.5"/>
-      <rect x="9" y="9" width="2.5" height="2.5"/>
-      <rect x="12.5" y="9" width="2.5" height="2.5"/>
-      <rect x="16" y="9" width="2.5" height="2.5"/>
-      <rect x="19.5" y="9" width="2.5" height="2.5"/>
-      <rect x="2" y="12.5" width="2.5" height="2.5"/>
-      <rect x="5.5" y="12.5" width="2.5" height="2.5"/>
-      <rect x="9" y="12.5" width="2.5" height="2.5"/>
-      <rect x="12.5" y="12.5" width="2.5" height="2.5"/>
-      <rect x="16" y="12.5" width="2.5" height="2.5"/>
-      <rect x="19.5" y="12.5" width="2.5" height="2.5"/>
-      <rect x="2" y="16" width="2.5" height="2.5"/>
-      <rect x="5.5" y="16" width="2.5" height="2.5"/>
-      <rect x="9" y="16" width="2.5" height="2.5"/>
-      <rect x="12.5" y="16" width="2.5" height="2.5"/>
-      <rect x="16" y="16" width="2.5" height="2.5"/>
-      <rect x="19.5" y="16" width="2.5" height="2.5"/>
-      <rect x="2" y="19.5" width="2.5" height="2.5"/>
-      <rect x="5.5" y="19.5" width="2.5" height="2.5"/>
-      <rect x="9" y="19.5" width="2.5" height="2.5"/>
-      <rect x="12.5" y="19.5" width="2.5" height="2.5"/>
-      <rect x="16" y="19.5" width="2.5" height="2.5"/>
-      <rect x="19.5" y="19.5" width="2.5" height="2.5"/>
+      <rect x="1" y="2" width="4" height="4" rx="1"/>
+      <rect x="6" y="2" width="4" height="4" rx="1"/>
+      <rect x="11" y="2" width="4" height="4" rx="1"/>
+      <rect x="16" y="2" width="4" height="4" rx="1"/>
+      <rect x="1" y="8" width="4" height="4" rx="1"/>
+      <rect x="6" y="8" width="4" height="4" rx="1"/>
+      <rect x="11" y="8" width="4" height="4" rx="1"/>
+      <rect x="16" y="8" width="4" height="4" rx="1"/>
     </svg>
   );
 
   const getGridIcon = (columns: number) => {
     switch (columns) {
       case 2:
-        return <Grid2x2 className="h-4 w-4" />;
+        return <CustomGrid2 className="h-4 w-4" />;
       case 3:
-        return <Grid3x3 className="h-4 w-4" />;
+        return <CustomGrid3 className="h-4 w-4" />;
       case 4:
         return <CustomGrid4 className="h-4 w-4" />;
       case 6:
@@ -104,11 +88,11 @@ export const ViewControls = ({ gridColumns, onGridColumnsChange }: ViewControlsP
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="bg-popover">
         <DropdownMenuItem onClick={() => onGridColumnsChange(2)} className="text-[10px]">
-          <Grid2x2 className="h-4 w-4 mr-2" />
+          <CustomGrid2 className="h-4 w-4 mr-2" />
           2 videos per row
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onGridColumnsChange(3)} className="text-[10px]">
-          <Grid3x3 className="h-4 w-4 mr-2" />
+          <CustomGrid3 className="h-4 w-4 mr-2" />
           3 videos per row
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onGridColumnsChange(4)} className="text-[10px]">

@@ -1,4 +1,4 @@
-import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2, Video, FileVideo, Columns, Rows, Minimize2, Maximize2 } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2, Video, FileVideo, Columns, Rows, Square, FileText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -95,7 +95,7 @@ export const FilterBar = ({
         {/* Single Row with Title and Status Boxes */}
         <div className="flex items-center gap-4">
           {/* Category Badges - Full Width */}
-          <div className="flex items-center gap-4 flex-1">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
           {statusOptions.map((option) => {
             const categoryEvents = option.status === "all" ? totalEvents : (statusCounts[option.status] || 0);
             const isSelected = option.status === "all" ? selectedStatuses.size === 0 : selectedStatuses.has(option.status);
@@ -143,12 +143,12 @@ export const FilterBar = ({
               <button
                 key={option.status}
                 onClick={() => onStatusToggle(option.status)}
-                className="flex items-center gap-1.5 cursor-pointer transition-all duration-200 hover:scale-105 min-w-0 flex-1"
+                className="flex items-center gap-1 cursor-pointer transition-all duration-200 hover:scale-105 min-w-0 flex-1"
               >
                 <Badge 
-                  className={`${getCategoryColor(option.status, isSelected)} text-sm font-semibold rounded-lg min-w-0 flex-1 flex items-center justify-between ${isFullscreen ? 'h-10 px-3' : 'h-14 px-4 sm:px-6'}`}
+                  className={`${getCategoryColor(option.status, isSelected)} text-sm font-semibold rounded-lg min-w-0 flex-1 flex items-center justify-between ${isFullscreen ? 'h-10 px-3' : 'h-12 px-4'}`}
                 >
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     {getCategoryIcon(option.status, isSelected)}
                     <span className="whitespace-nowrap">{getCategoryLabel(option.status)}</span>
                   </div>
@@ -236,7 +236,7 @@ export const FilterBar = ({
           className="gap-2 text-[10px] flex-shrink-0"
         >
           <Filter className="h-4 w-4" />
-          <span className="font-medium">Filters</span>
+          <span className="font-medium">Reset Filter</span>
         </Button>
 
         {/* My Events / All Events Toggle */}
@@ -312,35 +312,8 @@ export const FilterBar = ({
 
         </div>
         
-            {/* Pagination Controls for Horizontal View */}
-            {viewType === "horizontal" && !autoScroll && (
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Button variant="outline" size="sm" disabled className="h-8 px-2 text-xs">
-                  ← Previous
-                </Button>
-                <div className="flex gap-1">
-                  <Button variant="default" size="sm" className="h-8 w-8 p-0 text-xs">1</Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-xs">2</Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-xs">3</Button>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0 text-xs">4</Button>
-                </div>
-                <Button variant="outline" size="sm" className="h-8 px-2 text-xs">
-                  Next →
-                </Button>
-              </div>
-            )}
-        
         {/* Right Side Controls */}
         <div className="flex items-center gap-1 flex-shrink-0">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={onFullscreenToggle}
-            className="h-8 w-8 p-0 text-[10px]"
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-          >
-            {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
-          </Button>
           <Button 
             variant="outline"
             size="sm"
@@ -348,7 +321,7 @@ export const FilterBar = ({
             className="h-8 w-8 p-0"
             title={cardsExpanded ? "Compact view" : "Detailed view"}
           >
-            {cardsExpanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+            {cardsExpanded ? <Square className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
           </Button>
           <Button 
             variant="outline" 
@@ -360,6 +333,15 @@ export const FilterBar = ({
             {viewType === "vertical" ? <Rows className="h-4 w-4" /> : <Columns className="h-4 w-4" />}
           </Button>
           <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={onFullscreenToggle}
+            className="h-8 w-8 p-0 text-[10px]"
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullscreen ? <Minimize className="h-3 w-3" /> : <Maximize className="h-3 w-3" />}
+          </Button>
         </div>
       </div>
     </div>
