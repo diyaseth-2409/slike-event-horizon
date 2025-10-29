@@ -10,11 +10,10 @@ interface EventCardProps {
   onTogglePin: (id: string) => void;
   onPreview: (event: StreamEvent) => void;
   isExpanded: boolean;
-  viewType?: "vertical" | "horizontal";
   gridColumns?: number;
 }
 
-export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType = "vertical", gridColumns = 4 }: EventCardProps) => {
+export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, gridColumns = 4 }: EventCardProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "healthy":
@@ -101,14 +100,12 @@ export const EventCard = ({ event, onTogglePin, onPreview, isExpanded, viewType 
       {/* Content Below Video */}
       <div className={cn(
         "space-y-2 flex-shrink-0",
-        viewType === "horizontal" ? "p-1 space-y-0.5" : 
         (gridColumns >= 8) ? "p-1 space-y-0.5" : 
         (gridColumns >= 6) ? "p-1.5 space-y-0.5" : "p-2 sm:p-3 space-y-2 sm:space-y-3"
       )}>
         {/* Event Title */}
         <h3 className={cn(
           "font-semibold text-card-foreground",
-          viewType === "horizontal" ? "text-sm line-clamp-1" : 
           (gridColumns >= 8) ? "text-xs line-clamp-1" :
           (gridColumns >= 6) ? "text-xs line-clamp-1" : "text-xs sm:text-sm line-clamp-2"
         )}>

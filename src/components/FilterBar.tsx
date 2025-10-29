@@ -1,4 +1,4 @@
-import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2, Video, FileVideo, Columns, Rows, Square, FileText } from "lucide-react";
+import { Calendar, Filter, ChevronDown, ChevronUp, Search, X, User, Users, Maximize, Minimize, LayoutGrid, List, Play, Eye, AlertTriangle, Volume2, Video, FileVideo, Square, FileText } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -32,7 +32,6 @@ interface FilterBarProps {
   cardsExpanded: boolean;
   showMyEvents: boolean;
   isFullscreen: boolean;
-  viewType: "vertical" | "horizontal";
   autoScroll: boolean;
   onStatusToggle: (status: EventStatus) => void;
   onTimeFilterChange: (value: string) => void;
@@ -45,7 +44,6 @@ interface FilterBarProps {
   onShowMyEventsChange: (showMyEvents: boolean) => void;
   onResetFilters: () => void;
   onFullscreenToggle: () => void;
-  onViewTypeChange: (viewType: "vertical" | "horizontal") => void;
 }
 
 export const FilterBar = ({
@@ -60,7 +58,6 @@ export const FilterBar = ({
   cardsExpanded,
   showMyEvents,
   isFullscreen,
-  viewType,
   autoScroll,
   onStatusToggle,
   onTimeFilterChange,
@@ -73,7 +70,6 @@ export const FilterBar = ({
   onShowMyEventsChange,
   onResetFilters,
   onFullscreenToggle,
-  onViewTypeChange,
 }: FilterBarProps) => {
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const totalEvents = Object.values(statusCounts).reduce((a, b) => a + b, 0);
@@ -227,17 +223,6 @@ export const FilterBar = ({
 
         {/* All Other Filters - Right Side */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide flex-1 min-w-0">
-        
-        {/* Reset Filters Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onResetFilters}
-          className="gap-2 text-[10px] flex-shrink-0"
-        >
-          <Filter className="h-4 w-4" />
-          <span className="font-medium">Reset Filter</span>
-        </Button>
 
         {/* My Events / All Events Toggle */}
         <div className="flex items-center gap-1.5 px-2 py-1 bg-muted/50 rounded-md flex-shrink-0">
@@ -310,6 +295,17 @@ export const FilterBar = ({
           </SelectContent>
         </Select>
 
+        {/* Reset Filters Button - Moved to end */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onResetFilters}
+          className="h-8 w-8 p-0 flex-shrink-0"
+          title="Reset Filter"
+        >
+          <Filter className="h-4 w-4" />
+        </Button>
+
         </div>
         
         {/* Right Side Controls */}
@@ -322,15 +318,6 @@ export const FilterBar = ({
             title={cardsExpanded ? "Compact view" : "Detailed view"}
           >
             {cardsExpanded ? <Square className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
-          </Button>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => onViewTypeChange(viewType === "vertical" ? "horizontal" : "vertical")}
-            className="h-8 w-8 p-0 text-[10px]"
-            title={viewType === "vertical" ? "Switch to Horizontal View" : "Switch to Vertical View"}
-          >
-            {viewType === "vertical" ? <Rows className="h-4 w-4" /> : <Columns className="h-4 w-4" />}
           </Button>
           <ViewControls gridColumns={gridColumns} onGridColumnsChange={onGridColumnsChange} />
           <Button 

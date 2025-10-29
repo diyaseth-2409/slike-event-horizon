@@ -53,6 +53,7 @@ export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState("12:23");
   const [progress, setProgress] = useState(25); // 25% progress
+  const [showFullDescription, setShowFullDescription] = useState(false);
 
   console.log("PreviewModal event:", event);
   
@@ -117,6 +118,27 @@ export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
 
   const handleResetStream = () => {
     console.log("Reset stream:", event.id);
+  };
+
+  const truncateDescription = (text: string, maxLines: number = 7) => {
+    if (!text) return "No description provided";
+    
+    const lines = text.split('\n');
+    if (lines.length <= maxLines) return text;
+    
+    const truncatedLines = lines.slice(0, maxLines);
+    return truncatedLines.join('\n');
+  };
+
+  const getDescriptionText = () => {
+    if (!event.description) return "No description provided";
+    return showFullDescription ? event.description : truncateDescription(event.description, 7);
+  };
+
+  const shouldShowReadMore = () => {
+    if (!event.description) return false;
+    const lines = event.description.split('\n');
+    return lines.length > 7;
   };
 
   return (
@@ -275,8 +297,9 @@ export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
           </div>
 
           {/* Right Section - Title and Description */}
-          <div className="w-[400px] bg-white border-l overflow-y-auto">
-            <div className="p-6 space-y-6">
+          <div className="w-[400px] bg-white border-l flex flex-col">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Title */}
               <div>
                 <p className="text-sm text-gray-700 leading-relaxed">{event.title}</p>
@@ -284,11 +307,21 @@ export const PreviewModal = ({ event, open, onClose }: PreviewModalProps) => {
 
               {/* Description */}
               <div>
-                <p className="text-sm text-gray-700 leading-relaxed">{event.description || "No description provided"}</p>
+                <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{getDescriptionText()}</p>
+                {shouldShowReadMore() && (
+                  <button
+                    onClick={() => setShowFullDescription(!showFullDescription)}
+                    className="text-blue-600 hover:text-blue-800 text-xs mt-2 font-medium"
+                  >
+                    {showFullDescription ? "Read less" : "Read more"}
+                  </button>
+                )}
               </div>
+            </div>
 
-              {/* Action Buttons */}
-              <div className="flex justify-between gap-2 pt-4">
+            {/* Sticky Action Buttons */}
+            <div className="sticky bottom-0 bg-white border-t p-4">
+              <div className="flex justify-between gap-2">
                 <Button onClick={handleEditEvent} className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 h-7 flex-1">
                   <Edit className="h-3 w-3 mr-1" />
                   EDIT EVENT
